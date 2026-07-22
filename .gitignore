@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+build/
+.output/
+
+# Environment files
+.env
+.env.local
+.env.production
+
+# System logs & OS files
+*.log
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Flutter build artifacts
+mobile-app/build/
+mobile-app/.dart_tool/
+mobile-app/.pub/
+mobile-app/.pub-cache/

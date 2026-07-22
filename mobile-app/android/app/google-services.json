@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "265243036042",
+    "project_id": "localtool-2dda5",
+    "storage_bucket": "localtool-2dda5.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:265243036042:android:c95efd3a39e3378ccfe073",
+        "android_client_info": {
+          "package_name": "com.tool.share"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBFbFoE5Tq_2ykaYdAf4v4JWdNMAe9Qwo8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
