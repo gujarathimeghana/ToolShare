@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:dio/dio.dart';
 import '../core/api_client.dart';
 import '../models/tool_model.dart';
 
@@ -23,7 +24,7 @@ class ToolProvider extends ChangeNotifier {
         if (category.isNotEmpty) 'category': category,
       });
 
-      if (response.data['success'] == true) {
+      if (response.data != null && response.data['success'] == true) {
         final List list = response.data['data'] ?? [];
         _tools = list.map((item) => ToolModel.fromJson(item)).toList();
       }
@@ -42,16 +43,25 @@ class ToolProvider extends ChangeNotifier {
 
     try {
       final response = await _apiClient.dio.post('/tools', data: toolData);
-      if (response.data['success'] == true) {
+
+      if (response.data != null && (response.statusCode == 200 || response.statusCode == 201) && response.data['success'] == true) {
         await fetchTools();
         _isLoading = false;
         notifyListeners();
         return true;
+      } else if (response.data != null && response.data['message'] != null) {
+        _error = response.data['message'];
       } else {
-        _error = response.data['message'] ?? 'Failed to list tool';
+        _error = 'Failed to list tool (Server error ${response.statusCode})';
+      }
+    } on DioException catch (e) {
+      if (e.response != null && e.response?.data != null && e.response?.data['message'] != null) {
+        _error = e.response?.data['message'];
+      } else {
+        _error = e.message ?? 'Network connection error while listing tool';
       }
     } catch (e) {
-      _error = 'Network or server error while listing tool';
+      _error = 'Error listing tool: $e';
     }
 
     _isLoading = false;
