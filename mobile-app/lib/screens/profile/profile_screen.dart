@@ -12,23 +12,37 @@ class ProfileScreen extends StatelessWidget {
     final auth = Provider.of<AuthProvider>(context);
     final themeProvider = Provider.of<ThemeProvider>(context);
 
+    final name = auth.user?.name ?? 'Neighbor';
+    final initial = name.isNotEmpty ? name[0].toUpperCase() : 'N';
+
     return Scaffold(
       appBar: AppBar(title: const Text('My Profile & Settings')),
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
           Center(
-            child: CircleAvatar(
-              radius: 45,
-              backgroundImage: NetworkImage(
-                auth.user?.avatar.isNotEmpty == true
-                    ? auth.user!.avatar
-                    : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
+            child: Container(
+              width: 90,
+              height: 90,
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF4F46E5), Color(0xFF9333EA)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                shape: BoxShape.circle,
+                boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 10, offset: Offset(0, 4))],
+              ),
+              child: Center(
+                child: Text(
+                  initial,
+                  style: const TextStyle(fontSize: 40, fontWeight: FontWeight.bold, color: Colors.white),
+                ),
               ),
             ),
           ),
-          const SizedBox(height: 12),
-          Text(auth.user?.name ?? 'Guest Neighbor', textAlign: TextAlign.center, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 16),
+          Text(name, textAlign: TextAlign.center, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
           Text(auth.user?.email ?? '', textAlign: TextAlign.center, style: const TextStyle(color: Colors.grey, fontSize: 13)),
           const SizedBox(height: 30),
 

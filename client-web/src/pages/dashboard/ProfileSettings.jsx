@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useNotification } from '../../context/NotificationContext';
+import UserAvatar from '../../components/UserAvatar';
 import api from '../../services/api';
+import { FiUser, FiPhone, FiFileText, FiDollarSign, FiShield, FiCheckCircle } from 'react-icons/fi';
 
 const ProfileSettings = () => {
   const { user, updateUser } = useAuth();
@@ -35,68 +37,93 @@ const ProfileSettings = () => {
   };
 
   return (
-    <div className="p-8 rounded-3xl glassmorphism border border-slate-200 dark:border-slate-800 space-y-6">
-      <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white">Profile & Settings</h2>
+    <div className="p-8 rounded-3xl glassmorphism border border-slate-200/80 dark:border-slate-800/80 space-y-8 shadow-xl">
+      {/* Profile Header Badge */}
+      <div className="flex flex-col sm:flex-row items-center gap-6 p-6 rounded-2xl bg-gradient-to-br from-indigo-500/10 via-purple-500/5 to-emerald-500/10 border border-indigo-500/20">
+        <UserAvatar name={user?.name || name || 'User'} avatarUrl="" size="xl" />
+        <div className="text-center sm:text-left space-y-1">
+          <div className="flex items-center justify-center sm:justify-start gap-2">
+            <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">{user?.name || 'Neighbor'}</h2>
+            <span className="inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
+              <FiCheckCircle className="w-3.5 h-3.5" /> Verified Neighbor
+            </span>
+          </div>
+          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{user?.email}</p>
+          <p className="text-xs text-indigo-600 dark:text-indigo-400 font-semibold pt-1">
+            Initial Avatar Letter: <span className="font-extrabold uppercase text-lg px-2 py-0.5 rounded-md bg-indigo-500/20">{user?.name ? user.name.charAt(0) : 'N'}</span>
+          </p>
+        </div>
+      </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4 max-w-lg">
+      <form onSubmit={handleSubmit} className="space-y-5 max-w-xl">
         <div>
-          <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Full Name</label>
+          <label className="flex items-center gap-2 text-xs font-bold uppercase text-slate-500 dark:text-slate-400 mb-1.5">
+            <FiUser className="w-4 h-4 text-indigo-500" /> Full Account Name
+          </label>
           <input
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm"
+            className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-medium focus:ring-2 focus:ring-indigo-500 outline-none transition"
             required
           />
         </div>
 
         <div>
-          <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Phone Number</label>
+          <label className="flex items-center gap-2 text-xs font-bold uppercase text-slate-500 dark:text-slate-400 mb-1.5">
+            <FiPhone className="w-4 h-4 text-emerald-500" /> Phone Number
+          </label>
           <input
             type="tel"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
-            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm"
+            className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-medium focus:ring-2 focus:ring-indigo-500 outline-none transition"
           />
         </div>
 
         <div>
-          <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Bio / Skills Summary</label>
+          <label className="flex items-center gap-2 text-xs font-bold uppercase text-slate-500 dark:text-slate-400 mb-1.5">
+            <FiFileText className="w-4 h-4 text-amber-500" /> Neighborhood Bio & Skills
+          </label>
           <textarea
             rows="3"
             value={bio}
             onChange={(e) => setBio(e.target.value)}
-            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm"
+            className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-medium focus:ring-2 focus:ring-indigo-500 outline-none transition"
           ></textarea>
         </div>
 
-        <div className="flex items-center gap-3 pt-2">
-          <input
-            type="checkbox"
-            id="helperCheck"
-            checked={isHelper}
-            onChange={(e) => setIsHelper(e.target.checked)}
-            className="w-4 h-4 rounded text-primary"
-          />
-          <label htmlFor="helperCheck" className="text-sm font-semibold text-slate-800 dark:text-slate-200">
-            Register as a Local Skilled Helper
-          </label>
+        <div className="p-4 rounded-2xl bg-indigo-500/5 border border-indigo-500/20 space-y-3">
+          <div className="flex items-center gap-3">
+            <input
+              type="checkbox"
+              id="helperCheck"
+              checked={isHelper}
+              onChange={(e) => setIsHelper(e.target.checked)}
+              className="w-5 h-5 rounded text-indigo-600 focus:ring-indigo-500"
+            />
+            <label htmlFor="helperCheck" className="text-sm font-bold text-slate-900 dark:text-white cursor-pointer">
+              Offer Services as a Skilled Helper in Neighborhood
+            </label>
+          </div>
+
+          {isHelper && (
+            <div className="pl-8 pt-2">
+              <label className="flex items-center gap-2 text-xs font-bold uppercase text-slate-500 dark:text-slate-400 mb-1.5">
+                <FiDollarSign className="w-4 h-4 text-emerald-500" /> Hourly Rate ($)
+              </label>
+              <input
+                type="number"
+                value={hourlyRate}
+                onChange={(e) => setHourlyRate(e.target.value)}
+                className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-medium focus:ring-2 focus:ring-indigo-500 outline-none transition"
+              />
+            </div>
+          )}
         </div>
 
-        {isHelper && (
-          <div>
-            <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Hourly Rate ($)</label>
-            <input
-              type="number"
-              value={hourlyRate}
-              onChange={(e) => setHourlyRate(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm"
-            />
-          </div>
-        )}
-
-        <button type="submit" disabled={loading} className="py-3 px-6 rounded-xl font-bold text-white btn-gradient">
-          {loading ? 'Saving...' : 'Save Profile'}
+        <button type="submit" disabled={loading} className="w-full py-3.5 px-6 rounded-xl font-bold text-white btn-gradient shadow-lg shadow-indigo-500/25 transition hover:scale-[1.01]">
+          {loading ? 'Saving Changes...' : 'Update Account Profile'}
         </button>
       </form>
     </div>

@@ -7,7 +7,7 @@ const userSchema = new mongoose.Schema(
     email: { type: String, required: true, unique: true, lowercase: true, trim: true },
     password: { type: String, required: true, select: false },
     phone: { type: String, default: '' },
-    avatar: { type: String, default: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150' },
+    avatar: { type: String, default: '' },
     bio: { type: String, default: 'Friendly neighborhood tool sharer and helper!' },
     role: { type: String, enum: ['user', 'admin'], default: 'user' },
     isVerified: { type: Boolean, default: true },
