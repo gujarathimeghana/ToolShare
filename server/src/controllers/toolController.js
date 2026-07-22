@@ -14,21 +14,33 @@ exports.createTool = async (req, res, next) => {
     const catQuery = categoryName || category || 'Power Tools';
     let categoryObj = null;
 
-    if (mongoose.isValidObjectId(catQuery)) {
-      categoryObj = await Category.findById(catQuery);
+    // Check if valid 24-character hexadecimal ObjectId
+    const isStrictObjectId = typeof catQuery === 'string' && /^[0-9a-fA-F]{24}$/.test(catQuery);
+
+    if (isStrictObjectId) {
+      try {
+        categoryObj = await Category.findById(catQuery);
+      } catch (e) {
+        categoryObj = null;
+      }
+    }
+
+    if (!categoryObj && typeof catQuery === 'string') {
+      try {
+        const safeCat = catQuery.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+        categoryObj = await Category.findOne({
+          $or: [
+            { name: new RegExp('^' + safeCat + '$', 'i') },
+            { slug: catQuery.toLowerCase() }
+          ]
+        });
+      } catch (e) {
+        categoryObj = null;
+      }
     }
 
     if (!categoryObj) {
-      categoryObj = await Category.findOne({
-        $or: [
-          { name: new RegExp('^' + catQuery + '$', 'i') },
-          { slug: catQuery.toLowerCase() }
-        ]
-      });
-    }
-
-    if (!categoryObj) {
-      categoryObj = await Category.findOne(); // Fallback to first available category
+      categoryObj = await Category.findOne(); // Fallback to first category in database
     }
 
     if (!categoryObj) {
@@ -83,10 +95,12 @@ exports.getTools = async (req, res, next) => {
     }
 
     if (category) {
-      if (mongoose.isValidObjectId(category)) {
+      const isStrictObjectId = typeof category === 'string' && /^[0-9a-fA-F]{24}$/.test(category);
+      if (isStrictObjectId) {
         query.category = category;
       } else {
-        const catObj = await Category.findOne({ name: new RegExp('^' + category + '$', 'i') });
+        const safeCat = String(category).replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+        const catObj = await Category.findOne({ name: new RegExp('^' + safeCat + '$', 'i') });
         if (catObj) query.category = catObj._id;
       }
     }
