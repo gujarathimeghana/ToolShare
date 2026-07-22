@@ -12,12 +12,22 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final _emailController = TextEditingController(text: 'alex@example.com');
-  final _passwordController = TextEditingController(text: 'password123');
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
 
   void _handleLogin() async {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+
+    if (email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter your email and password.')),
+      );
+      return;
+    }
+
     final auth = Provider.of<AuthProvider>(context, listen: false);
-    final success = await auth.login(_emailController.text.trim(), _passwordController.text.trim());
+    final success = await auth.login(email, password);
 
     if (success && mounted) {
       Navigator.of(context).pushReplacement(
@@ -25,7 +35,7 @@ class _LoginScreenState extends State<LoginScreen> {
       );
     } else if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Login failed. Please check your credentials.')),
+        const SnackBar(content: Text('Invalid credentials. Please check email and password.')),
       );
     }
   }
@@ -44,14 +54,19 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 40),
               Center(
                 child: Container(
-                  width: 70,
-                  height: 70,
+                  width: 75,
+                  height: 75,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF4F46E5),
-                    borderRadius: BorderRadius.circular(20),
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF4F46E5), Color(0xFF9333EA)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(22),
+                    boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 12, offset: Offset(0, 4))],
                   ),
                   child: const Center(
-                    child: Text('N', style: TextStyle(color: Colors.white, fontSize: 36, fontWeight: FontWeight.bold)),
+                    child: Text('N', style: TextStyle(color: Colors.white, fontSize: 38, fontWeight: FontWeight.bold)),
                   ),
                 ),
               ),
@@ -63,8 +78,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
               TextField(
                 controller: _emailController,
+                keyboardType: TextInputType.emailAddress,
                 decoration: InputDecoration(
                   labelText: 'Email Address',
+                  hintText: 'Enter your registered email',
                   prefixIcon: const Icon(Icons.email_outlined),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
                 ),
@@ -75,6 +92,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 obscureText: true,
                 decoration: InputDecoration(
                   labelText: 'Password',
+                  hintText: 'Enter your password',
                   prefixIcon: const Icon(Icons.lock_outline),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
                 ),
@@ -87,6 +105,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   backgroundColor: const Color(0xFF4F46E5),
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  elevation: 4,
                 ),
                 child: auth.isLoading
                     ? const CircularProgressIndicator(color: Colors.white)

@@ -11,7 +11,9 @@ exports.register = async (req, res, next) => {
       return sendResponse(res, 400, false, 'Name, email, and password are required');
     }
 
-    if (!isValidEmail(email)) {
+    const cleanEmail = email.toLowerCase().trim();
+
+    if (!isValidEmail(cleanEmail)) {
       return sendResponse(res, 400, false, 'Invalid email format');
     }
 
@@ -19,16 +21,17 @@ exports.register = async (req, res, next) => {
       return sendResponse(res, 400, false, 'Password must be at least 6 characters long');
     }
 
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ email: cleanEmail });
     if (existingUser) {
       return sendResponse(res, 400, false, 'User already exists with this email');
     }
 
     const user = await User.create({
-      name,
-      email,
+      name: name.trim(),
+      email: cleanEmail,
       password,
       phone: phone || '',
+      avatar: '',
       location: location || { type: 'Point', coordinates: [-73.935242, 40.73061], address: 'New York, NY' }
     });
 
@@ -61,14 +64,16 @@ exports.login = async (req, res, next) => {
       return sendResponse(res, 400, false, 'Please provide email and password');
     }
 
-    const user = await User.findOne({ email }).select('+password');
+    const cleanEmail = email.toLowerCase().trim();
+
+    const user = await User.findOne({ email: cleanEmail }).select('+password');
     if (!user) {
-      return sendResponse(res, 401, false, 'Invalid credentials');
+      return sendResponse(res, 401, false, 'Invalid email or password credentials');
     }
 
     const isMatch = await user.matchPassword(password);
     if (!isMatch) {
-      return sendResponse(res, 401, false, 'Invalid credentials');
+      return sendResponse(res, 401, false, 'Invalid email or password credentials');
     }
 
     const token = generateToken(user._id, user.role);
@@ -100,14 +105,15 @@ exports.googleLogin = async (req, res, next) => {
       return sendResponse(res, 400, false, 'Email is required for Google authentication');
     }
 
-    let user = await User.findOne({ email });
+    const cleanEmail = email.toLowerCase().trim();
+    let user = await User.findOne({ email: cleanEmail });
 
     if (!user) {
       user = await User.create({
         name: name || 'Google User',
-        email,
+        email: cleanEmail,
         password: Math.random().toString(36).slice(-10) + 'A1!',
-        avatar: avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
+        avatar: avatar || '',
         isVerified: true
       });
     }
@@ -212,7 +218,8 @@ exports.uploadAvatar = async (req, res, next) => {
 exports.forgotPassword = async (req, res, next) => {
   try {
     const { email } = req.body;
-    const user = await User.findOne({ email });
+    const cleanEmail = email ? email.toLowerCase().trim() : '';
+    const user = await User.findOne({ email: cleanEmail });
     if (!user) {
       return sendResponse(res, 404, false, 'No account with that email address exists.');
     }
