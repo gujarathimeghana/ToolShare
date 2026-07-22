@@ -1,6 +1,6 @@
 class AppConstants {
-  static const String apiBaseUrl = 'http://10.0.2.2:5000/api';
-  static const String socketUrl = 'http://10.0.2.2:5000';
+  static const String apiBaseUrl = 'https://toolshare-production-e02e.up.railway.app/api';
+  static const String socketUrl = 'https://toolshare-production-e02e.up.railway.app';
 
   static const String tokenKey = 'neighborly_auth_token';
   static const String themeKey = 'neighborly_app_theme';
