@@ -23,7 +23,7 @@ class RegisterScreen extends StatelessWidget {
                 onPressed: () => Navigator.pop(context),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF4F46E5),
-                  padding: const EdgeInsets.vertical: 16,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                 ),
                 child: const Text('Register Account', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),

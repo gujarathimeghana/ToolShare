@@ -29,11 +29,11 @@ class ToolDetailsScreen extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(tool.categoryName, style: const TextStyle(color: Color(0xFF4F46E5), fontWeight: FontWeight.bold)),
-                      Text('\$${tool.pricePerDay.toStringAsFixed(0)} / day', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.black)),
+                      Text('\$${tool.pricePerDay.toStringAsFixed(0)} / day', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900)),
                     ],
                   ),
                   const SizedBox(height: 12),
-                  Text(tool.title, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.extrabold)),
+                  Text(tool.title, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
                   const SizedBox(height: 12),
                   Text(tool.description, style: TextStyle(color: Colors.grey[700], fontSize: 14, height: 1.5)),
                   const SizedBox(height: 30),

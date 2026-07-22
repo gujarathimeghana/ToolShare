@@ -60,7 +60,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: const [
-                        Text('Borrow Tools Nearby', style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.black)),
+                        Text('Borrow Tools Nearby', style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w900)),
                         SizedBox(height: 6),
                         Text('Save money, reduce clutter, borrow from neighbors.', style: TextStyle(color: Colors.white70, fontSize: 13)),
                       ],
@@ -112,7 +112,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         const SizedBox(height: 4),
                                         Text(tool.categoryName, style: const TextStyle(color: Color(0xFF4F46E5), fontSize: 12, fontWeight: FontWeight.w600)),
                                         const SizedBox(height: 8),
-                                        Text('\$${tool.pricePerDay.toStringAsFixed(0)} / day', style: const TextStyle(fontWeight: FontWeight.extrabold, fontSize: 16)),
+                                        Text('\$${tool.pricePerDay.toStringAsFixed(0)} / day', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
                                       ],
                                     ),
                                   ),

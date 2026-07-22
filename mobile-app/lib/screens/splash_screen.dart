@@ -7,7 +7,7 @@ import 'main_nav_screen.dart';
 class SplashScreen extends StatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);
 
-  @override:
+  @override
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
@@ -60,7 +60,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 ),
               ),
               const SizedBox(height: 24),
-              const Text('Neighborly', style: TextStyle(fontSize: 32, fontWeight: FontWeight.extrabold, color: Colors.white)),
+              const Text('Neighborly', style: TextStyle(fontSize: 32, fontWeight: FontWeight.w800, color: Colors.white)),
               const SizedBox(height: 8),
               const Text('Hyper-local Tool Sharing & Help', style: TextStyle(fontSize: 14, color: Colors.white70)),
               const SizedBox(height: 48),

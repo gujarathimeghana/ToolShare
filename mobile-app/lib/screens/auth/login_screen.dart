@@ -56,7 +56,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
               const SizedBox(height: 24),
-              const Text('Welcome Back', textAlign: TextAlign.center, style: TextStyle(fontSize: 28, fontWeight: FontWeight.black)),
+              const Text('Welcome Back', textAlign: TextAlign.center, style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900)),
               const SizedBox(height: 8),
               Text('Sign in to continue borrowing and lending', textAlign: TextAlign.center, style: TextStyle(color: Colors.grey[600], fontSize: 14)),
               const SizedBox(height: 40),
@@ -85,8 +85,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 onPressed: auth.isLoading ? null : _handleLogin,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF4F46E5),
-                  padding: const EdgeInsets.vertical: 16),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                ),
                 child: auth.isLoading
                     ? const CircularProgressIndicator(color: Colors.white)
                     : const Text('Sign In', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
