@@ -1,39 +1,69 @@
+const mongoose = require('mongoose');
 const Tool = require('../models/Tool');
 const Category = require('../models/Category');
 const { sendResponse } = require('../utils/response');
 
 exports.createTool = async (req, res, next) => {
   try {
-    const { title, description, category, images, pricePerDay, securityDeposit, condition, location, tags } = req.body;
+    const { title, description, category, categoryName, images, pricePerDay, securityDeposit, condition, location, tags } = req.body;
 
-    if (!title || !description || !category || !pricePerDay) {
-      return sendResponse(res, 400, false, 'Title, description, category, and pricePerDay are required');
+    if (!title || !description || !pricePerDay) {
+      return sendResponse(res, 400, false, 'Title, description, and pricePerDay are required');
     }
 
-    const categoryObj = await Category.findById(category);
+    const catQuery = categoryName || category || 'Power Tools';
+    let categoryObj = null;
+
+    if (mongoose.isValidObjectId(catQuery)) {
+      categoryObj = await Category.findById(catQuery);
+    }
+
     if (!categoryObj) {
-      return sendResponse(res, 400, false, 'Invalid category selected');
+      categoryObj = await Category.findOne({
+        $or: [
+          { name: new RegExp('^' + catQuery + '$', 'i') },
+          { slug: catQuery.toLowerCase() }
+        ]
+      });
     }
 
-    const toolImages = images && images.length > 0 ? images : ['https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=500'];
+    if (!categoryObj) {
+      categoryObj = await Category.findOne(); // Fallback to first available category
+    }
+
+    if (!categoryObj) {
+      categoryObj = await Category.create({
+        name: 'General Tools',
+        slug: 'general-tools',
+        type: 'tool'
+      });
+    }
+
+    const toolImages = images && Array.isArray(images) && images.length > 0 && images[0].trim() !== ''
+      ? images
+      : ['https://images.unsplash.com/photo-1504148455328-c376907d081c?w=600'];
 
     const tool = await Tool.create({
       title,
       description,
-      category,
+      category: categoryObj._id,
       images: toolImages,
-      pricePerDay,
-      securityDeposit: securityDeposit || 0,
+      pricePerDay: Number(pricePerDay),
+      securityDeposit: Number(securityDeposit) || 0,
       condition: condition || 'Good',
       owner: req.user._id,
-      location: location || req.user.location,
+      location: location || req.user.location || { type: 'Point', coordinates: [-73.935242, 40.73061], address: 'New York, NY' },
       tags: tags || []
     });
 
     categoryObj.itemCount += 1;
     await categoryObj.save();
 
-    return sendResponse(res, 201, true, 'Tool listed successfully', tool);
+    const populatedTool = await Tool.findById(tool._id)
+      .populate('category', 'name slug icon')
+      .populate('owner', 'name avatar rating location phone');
+
+    return sendResponse(res, 201, true, 'Tool listed successfully', populatedTool);
   } catch (error) {
     next(error);
   }
@@ -53,7 +83,12 @@ exports.getTools = async (req, res, next) => {
     }
 
     if (category) {
-      query.category = category;
+      if (mongoose.isValidObjectId(category)) {
+        query.category = category;
+      } else {
+        const catObj = await Category.findOne({ name: new RegExp('^' + category + '$', 'i') });
+        if (catObj) query.category = catObj._id;
+      }
     }
 
     if (minPrice || maxPrice) {
