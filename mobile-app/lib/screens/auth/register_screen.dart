@@ -28,7 +28,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Please fill out Name, Email, and Password.'),
-          backgroundColor: Colors.rose,
+          backgroundColor: Colors.red,
         ),
       );
       return;
@@ -51,7 +51,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Account created successfully! Welcome to Neighborly.'),
-          backgroundColor: Colors.emerald,
+          backgroundColor: Colors.green,
         ),
       );
       Navigator.of(context).pushAndRemoveUntil(
@@ -62,7 +62,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(auth.error ?? 'Registration failed. Try a different email.'),
-          backgroundColor: Colors.rose,
+          backgroundColor: Colors.red,
         ),
       );
     }
@@ -110,7 +110,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ],
                   ),
                   child: const Center(
-                    child: Text('N', style: TextStyle(color: Colors.white, fontSize: 36, fontWeight: FontWeight.black)),
+                    child: Text('N', style: TextStyle(color: Colors.white, fontSize: 36, fontWeight: FontWeight.w900)),
                   ),
                 ),
               ),

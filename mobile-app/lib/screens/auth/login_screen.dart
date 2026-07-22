@@ -23,7 +23,7 @@ class _LoginScreenState extends State<LoginScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Please enter your email and password.'),
-          backgroundColor: Colors.rose,
+          backgroundColor: Colors.red,
         ),
       );
       return;
@@ -40,7 +40,7 @@ class _LoginScreenState extends State<LoginScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(auth.error ?? 'Invalid email or password.'),
-          backgroundColor: Colors.rose,
+          backgroundColor: Colors.red,
         ),
       );
     }
@@ -82,7 +82,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ],
                   ),
                   child: const Center(
-                    child: Text('N', style: TextStyle(color: Colors.white, fontSize: 40, fontWeight: FontWeight.black)),
+                    child: Text('N', style: TextStyle(color: Colors.white, fontSize: 40, fontWeight: FontWeight.w900)),
                   ),
                 ),
               ),
