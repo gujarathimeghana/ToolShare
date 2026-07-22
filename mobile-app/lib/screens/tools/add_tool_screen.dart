@@ -45,6 +45,7 @@ class _AddToolScreenState extends State<AddToolScreen> {
       'title': _titleController.text.trim(),
       'description': _descriptionController.text.trim(),
       'categoryName': _selectedCategory,
+      'category': _selectedCategory,
       'pricePerDay': double.tryParse(_priceController.text) ?? 15.0,
       'securityDeposit': double.tryParse(_depositController.text) ?? 50.0,
       'condition': _selectedCondition,
@@ -63,8 +64,8 @@ class _AddToolScreenState extends State<AddToolScreen> {
       Navigator.pop(context);
     } else if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Failed to list tool. Please try again.'),
+        SnackBar(
+          content: Text(toolProvider.error ?? 'Failed to list tool. Please try again.'),
           backgroundColor: Colors.red,
         ),
       );
