@@ -135,7 +135,7 @@ class _NearbyMapScreenState extends State<NearbyMapScreen> {
           IconButton(
             icon: const Icon(Icons.my_location, color: Color(0xFF4F46E5)),
             onPressed: _determinePosition,
-            title: 'Center My Location',
+            tooltip: 'Center My Location',
           ),
         ],
       ),

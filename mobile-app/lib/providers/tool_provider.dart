@@ -31,4 +31,23 @@ class ToolProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  Future<bool> createTool(Map<String, dynamic> toolData) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final response = await _apiClient.dio.post('/tools', data: toolData);
+      if (response.data['success'] == true) {
+        await fetchTools();
+        return true;
+      }
+    } catch (e) {
+      print('Create tool error: $e');
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+    return false;
+  }
 }
