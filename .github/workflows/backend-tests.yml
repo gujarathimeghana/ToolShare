@@ -1,0 +1,38 @@
+name: Run Backend API Test Suite & Generate Report
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  backend-api-tests:
+    name: Run Backend API Tests (300+ Test Cases)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Backend Test Dependencies
+        run: |
+          cd server
+          npm install
+
+      - name: Execute Backend API Test Suite (300+ Test Cases)
+        env:
+          API_URL: 'https://toolshare-production-e02e.up.railway.app/api'
+        run: |
+          cd server
+          npm test
+
+      - name: Upload Backend Excel Test Report Artifact (300+ Test Cases)
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-test-report-xlsx
+          path: server/backend_test_report.xlsx
