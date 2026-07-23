@@ -1,0 +1,13 @@
+{
+  "name": "neighborly-selenium-tests",
+  "version": "1.0.0",
+  "description": "Selenium Web E2E Automation Test Suite for Neighborly Marketplace",
+  "main": "tests/login-tests.js",
+  "scripts": {
+    "test": "node tests/login-tests.js"
+  },
+  "dependencies": {
+    "selenium-webdriver": "^4.16.0",
+    "xlsx": "^0.18.5"
+  }
+}

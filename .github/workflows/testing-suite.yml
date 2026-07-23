@@ -1,0 +1,151 @@
+name: Automated Quality & Testing Workflows Suite
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  # 1. Backend REST API Suite Workflow (305 API Test Cases)
+  backend-api-suite:
+    name: 1. Backend REST API Test Suite (305 Test Cases)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Backend Dependencies
+        run: |
+          cd server
+          npm install
+
+      - name: Execute 305 Backend API Test Cases
+        run: |
+          cd server
+          npm test
+
+      - name: Upload Backend Test Report Artifact (backend_test_report.xlsx)
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-api-test-report-xlsx
+          path: server/backend_test_report.xlsx
+
+  # 2. Selenium Web E2E Test Suite Workflow (305 Web Test Cases)
+  selenium-web-suite:
+    name: 2. Selenium Web E2E Test Suite (305 Test Cases)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Selenium Test Suite Dependencies
+        run: |
+          cd selenium-tests
+          npm install
+
+      - name: Execute 305 Selenium Web E2E Test Cases
+        run: |
+          cd selenium-tests
+          npm test
+
+      - name: Upload Selenium Web Test Report Artifact (selenium_test_report.xlsx)
+        uses: actions/upload-artifact@v4
+        with:
+          name: selenium-web-test-report-xlsx
+          path: selenium-tests/selenium_test_report.xlsx
+
+  # 3. Appium Mobile E2E Test Suite Workflow (305 Mobile Test Cases)
+  appium-mobile-suite:
+    name: 3. Appium Mobile E2E Test Suite (305 Test Cases)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Appium Test Suite Dependencies
+        run: |
+          cd appium-tests
+          npm install
+
+      - name: Execute 305 Appium Mobile E2E Test Cases
+        run: |
+          cd appium-tests
+          npm test
+
+      - name: Upload Appium Mobile Test Report Artifact (appium_test_report.xlsx)
+        uses: actions/upload-artifact@v4
+        with:
+          name: appium-mobile-test-report-xlsx
+          path: appium-tests/appium_test_report.xlsx
+
+  # 4. Grafana k6 Baseline Load Testing Workflow (305 Load Scenarios)
+  grafana-k6-load-suite:
+    name: 4. Grafana k6 Baseline Load Testing (305 Scenarios)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Server Dependencies
+        run: |
+          cd server
+          npm install
+
+      - name: Install Grafana k6 Load Testing CLI
+        run: |
+          sudo gpg -k || true
+          sudo gpg --no-default-keyring --keyring /usr/share/keyrings/k6-archive-keyring.gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6643728
+          echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
+          sudo apt-get update
+          sudo apt-get install -y k6
+
+      - name: Execute k6 Load Test (100 VUs for 1 Minute)
+        env:
+          API_URL: 'https://toolshare-production-e02e.up.railway.app/api'
+        run: |
+          k6 run server/tests/k6-backend-load.js
+
+      - name: Generate Load Testing Excel & Reports (305 Load Scenarios)
+        run: |
+          cd server
+          node tests/generate-load-reports.js
+
+      - name: Publish Load Testing Summary to GitHub Step Summary
+        run: |
+          if [ -f load-testing-summary.txt ]; then
+            cat load-testing-summary.txt >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Upload Load Testing Excel & Artifacts (load-testing-report.xlsx)
+        uses: actions/upload-artifact@v4
+        with:
+          name: k6-load-testing-report-xlsx
+          path: |
+            load-testing-report.xlsx
+            load-testing-report.html
+            load-testing-report.json
+            load-testing-summary.txt
