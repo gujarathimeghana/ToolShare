@@ -1,4 +1,4 @@
-name: Load Testing
+name: Load Testing (300+ Test Cases)
 
 on:
   push:
@@ -38,23 +38,23 @@ jobs:
         run: |
           k6 run server/tests/k6-backend-load.js
 
-      - name: Generate Load Testing Reports (Excel, JSON, TXT - 300+ Test Cases)
+      - name: Generate Load Testing Reports (Excel, JSON, HTML, TXT - 300+ Test Cases)
         run: |
           cd server
           node tests/generate-load-reports.js
 
       - name: Publish Load Testing Summary to GitHub Step Summary
         run: |
-          if [ -f load-test-summary.txt ]; then
-            cat load-test-summary.txt >> $GITHUB_STEP_SUMMARY
+          if [ -f load-testing-summary.txt ]; then
+            cat load-testing-summary.txt >> $GITHUB_STEP_SUMMARY
           fi
 
-      - name: Upload Load Testing Artifacts (Excel, HTML, JSON, TXT)
+      - name: Upload Downloadable Load Testing Artifacts (Excel, HTML, JSON, TXT)
         uses: actions/upload-artifact@v4
         with:
           name: load-testing-reports
           path: |
-            load-test-report.xlsx
-            load_test_report.html
-            load-test-report.json
-            load-test-summary.txt
+            load-testing-report.xlsx
+            load-testing-report.html
+            load-testing-report.json
+            load-testing-summary.txt
