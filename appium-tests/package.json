@@ -1,0 +1,13 @@
+{
+  "name": "neighborly-appium-tests",
+  "version": "1.0.0",
+  "description": "Appium E2E Functional Automation Test Suite for Neighborly Mobile Application",
+  "main": "tests/app-tests.js",
+  "scripts": {
+    "test": "node tests/app-tests.js"
+  },
+  "dependencies": {
+    "webdriverio": "^8.32.0",
+    "xlsx": "^0.18.5"
+  }
+}
