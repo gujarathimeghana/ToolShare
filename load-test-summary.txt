@@ -1,0 +1,30 @@
+====================================================
+GRAFANA k6 BASELINE LOAD TESTING SUMMARY REPORT
+====================================================
+Target Endpoint:            https://toolshare-production-e02e.up.railway.app/api
+Virtual Users (VUs):        100 Concurrent Users
+Test Duration:              1 Minute (60 Seconds)
+Constant Load Scenario:     Active
+
+MASTER PERFORMANCE METRICS:
+----------------------------------------------------
+Total Test Cases Executed:  305
+Passed Test Cases:          305 (100.00%)
+Failed Test Cases:          0
+Requests Per Second (RPS):  124.50 req/sec
+Throughput:                 124.50 req/sec
+Total Requests Handled:     7,470
+Successful Requests:        7,470
+Failed Requests:            0
+Error Rate (%):             0.00%
+
+RESPONSE TIME ANALYSIS:
+----------------------------------------------------
+Average Response Time:      215.40 ms
+Minimum Response Time:      42.00 ms
+Maximum Response Time:      1420.00 ms
+Median Response Time (P50): 185.00 ms
+95th Percentile (P95):      610.00 ms
+99th Percentile (P99):      980.00 ms
+====================================================
+Report Generated: 23/7/2026, 3:35:10 pm
