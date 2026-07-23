@@ -3,15 +3,20 @@ import { useAuth } from '../../context/AuthContext';
 import { useNotification } from '../../context/NotificationContext';
 import UserAvatar from '../../components/UserAvatar';
 import api from '../../services/api';
-import { FiUser, FiPhone, FiFileText, FiDollarSign, FiShield, FiCheckCircle } from 'react-icons/fi';
+import { FiUser, FiPhone, FiFileText, FiDollarSign, FiMapPin, FiCheckCircle } from 'react-icons/fi';
 
 const ProfileSettings = () => {
   const { user, updateUser } = useAuth();
   const { showToast } = useNotification();
 
+  const loc = user?.location || {};
   const [name, setName] = useState(user?.name || '');
   const [phone, setPhone] = useState(user?.phone || '');
   const [bio, setBio] = useState(user?.bio || '');
+  const [city, setCity] = useState(loc.city || 'New York');
+  const [area, setArea] = useState(loc.area || 'Manhattan');
+  const [state, setState] = useState(loc.state || 'NY');
+  const [pincode, setPincode] = useState(loc.pincode || '');
   const [isHelper, setIsHelper] = useState(user?.isHelper || false);
   const [hourlyRate, setHourlyRate] = useState(user?.hourlyRate || 30);
   const [loading, setLoading] = useState(false);
@@ -24,11 +29,15 @@ const ProfileSettings = () => {
         name,
         phone,
         bio,
+        city,
+        area,
+        state,
+        pincode,
         isHelper,
         hourlyRate
       });
       updateUser(res.data);
-      showToast('Profile updated successfully!', 'success');
+      showToast('Profile and manual location updated successfully!', 'success');
     } catch (err) {
       showToast(err.message || 'Update failed', 'error');
     } finally {
@@ -49,9 +58,10 @@ const ProfileSettings = () => {
             </span>
           </div>
           <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{user?.email}</p>
-          <p className="text-xs text-indigo-600 dark:text-indigo-400 font-semibold pt-1">
-            Initial Avatar Letter: <span className="font-extrabold uppercase text-lg px-2 py-0.5 rounded-md bg-indigo-500/20">{user?.name ? user.name.charAt(0) : 'N'}</span>
-          </p>
+          <div className="flex items-center justify-center sm:justify-start gap-1 text-xs font-bold text-indigo-600 dark:text-indigo-400 pt-1">
+            <FiMapPin className="text-indigo-500" />
+            <span>Location: {loc.address || [area, city, state].filter(Boolean).join(', ')}</span>
+          </div>
         </div>
       </div>
 
@@ -79,6 +89,62 @@ const ProfileSettings = () => {
             onChange={(e) => setPhone(e.target.value)}
             className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-medium focus:ring-2 focus:ring-indigo-500 outline-none transition"
           />
+        </div>
+
+        {/* Manual Location Fields */}
+        <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 space-y-4">
+          <h4 className="font-extrabold text-sm text-slate-900 dark:text-white flex items-center gap-2">
+            <FiMapPin className="text-indigo-500" /> Manual Location Details
+          </h4>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold uppercase text-slate-500 mb-1">City</label>
+              <input
+                type="text"
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                placeholder="e.g. New York"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-medium"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Area / Locality</label>
+              <input
+                type="text"
+                value={area}
+                onChange={(e) => setArea(e.target.value)}
+                placeholder="e.g. Manhattan"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-medium"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold uppercase text-slate-500 mb-1">State</label>
+              <input
+                type="text"
+                value={state}
+                onChange={(e) => setState(e.target.value)}
+                placeholder="e.g. NY"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-medium"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold uppercase text-slate-500 mb-1">PIN Code (Optional)</label>
+              <input
+                type="text"
+                value={pincode}
+                onChange={(e) => setPincode(e.target.value)}
+                placeholder="e.g. 10001"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-medium"
+              />
+            </div>
+          </div>
         </div>
 
         <div>

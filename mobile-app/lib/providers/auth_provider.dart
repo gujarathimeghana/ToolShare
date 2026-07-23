@@ -110,6 +110,27 @@ class AuthProvider extends ChangeNotifier {
     return false;
   }
 
+  Future<bool> updateProfile(Map<String, dynamic> data) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final response = await _apiClient.dio.put('/auth/profile', data: data);
+      if (response.data != null && response.data['success'] == true) {
+        _user = UserModel.fromJson(response.data['data']);
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      }
+    } catch (e) {
+      print('Update profile error: $e');
+    }
+
+    _isLoading = false;
+    notifyListeners();
+    return false;
+  }
+
   Future<void> logout() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(AppConstants.tokenKey);

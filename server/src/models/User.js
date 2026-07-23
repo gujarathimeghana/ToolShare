@@ -16,8 +16,12 @@ const userSchema = new mongoose.Schema(
     hourlyRate: { type: Number, default: 0 },
     location: {
       type: { type: String, enum: ['Point'], default: 'Point' },
-      coordinates: { type: [Number], default: [-73.935242, 40.73061] }, // [lng, lat]
-      address: { type: String, default: 'New York, NY' }
+      coordinates: { type: [Number], default: [-73.935242, 40.73061] },
+      city: { type: String, default: 'New York' },
+      area: { type: String, default: 'Manhattan' },
+      state: { type: String, default: 'NY' },
+      pincode: { type: String, default: '10001' },
+      address: { type: String, default: 'Manhattan, New York, NY 10001' }
     },
     rating: { type: Number, default: 5.0 },
     reviewCount: { type: Number, default: 0 },
@@ -26,8 +30,6 @@ const userSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-
-userSchema.index({ location: '2dsphere' });
 
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();

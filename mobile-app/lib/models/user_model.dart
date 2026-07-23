@@ -7,6 +7,7 @@ class UserModel {
   final String role;
   final bool isHelper;
   final double rating;
+  final Map<String, dynamic> location;
 
   UserModel({
     required this.id,
@@ -17,6 +18,7 @@ class UserModel {
     required this.role,
     required this.isHelper,
     required this.rating,
+    required this.location,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -29,6 +31,7 @@ class UserModel {
       role: json['role'] ?? 'user',
       isHelper: json['isHelper'] ?? false,
       rating: (json['rating'] ?? 5.0).toDouble(),
+      location: json['location'] is Map ? json['location'] : {},
     );
   }
 }

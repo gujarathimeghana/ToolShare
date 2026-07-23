@@ -13,6 +13,7 @@ class ToolModel {
   final double lat;
   final double lng;
   final UserModel? owner;
+  final String ownerId;
   final double rating;
 
   ToolModel({
@@ -28,6 +29,7 @@ class ToolModel {
     required this.lat,
     required this.lng,
     this.owner,
+    required this.ownerId,
     required this.rating,
   });
 
@@ -39,6 +41,8 @@ class ToolModel {
 
     final loc = json['location'] ?? {};
     final coords = loc['coordinates'] ?? [-73.935242, 40.73061];
+    final ownerObj = json['owner'] != null && json['owner'] is Map ? UserModel.fromJson(json['owner']) : null;
+    final ownerStrId = json['owner'] is String ? json['owner'] : (ownerObj?.id ?? '');
 
     return ToolModel(
       id: json['_id'] ?? '',
@@ -52,7 +56,8 @@ class ToolModel {
       address: loc['address'] ?? 'Local Neighborhood',
       lat: (coords[1] ?? 40.73061).toDouble(),
       lng: (coords[0] ?? -73.935242).toDouble(),
-      owner: json['owner'] != null && json['owner'] is Map ? UserModel.fromJson(json['owner']) : null,
+      owner: ownerObj,
+      ownerId: ownerStrId,
       rating: (json['rating'] ?? 5.0).toDouble(),
     );
   }

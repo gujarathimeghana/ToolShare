@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import OpenStreetMap from '../components/OpenStreetMap';
 import RatingStars from '../components/RatingStars';
 import Modal from '../components/Modal';
 import api from '../services/api';
@@ -81,6 +80,9 @@ const ToolDetailsPage = () => {
     return <div className="max-w-7xl mx-auto px-4 py-20 text-center text-slate-500 font-bold">Tool not found.</div>;
   }
 
+  const loc = tool.location || {};
+  const formattedAddress = loc.address || [loc.area, loc.city, loc.state].filter(Boolean).join(', ') + (loc.pincode ? ` - ${loc.pincode}` : '');
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-12">
       {/* Top Details Grid */}
@@ -139,9 +141,9 @@ const ToolDetailsPage = () => {
 
             <p className="text-slate-600 dark:text-slate-300 text-base leading-relaxed">{tool.description}</p>
 
-            <div className="flex items-center gap-2 text-sm text-slate-500 pt-2">
-              <FiMapPin className="text-primary" />
-              <span>{tool.location?.address}</span>
+            <div className="flex items-center gap-2 text-sm text-slate-500 pt-2 font-semibold">
+              <FiMapPin className="text-primary text-lg shrink-0" />
+              <span>Location: {formattedAddress || 'New York, NY'}</span>
             </div>
           </div>
 
@@ -187,18 +189,14 @@ const ToolDetailsPage = () => {
         </div>
       </div>
 
-      {/* Pickup Location Map */}
-      <section className="space-y-4">
-        <h3 className="text-xl font-bold text-slate-900 dark:text-white">Pickup Location</h3>
-        <OpenStreetMap
-          markers={[{
-            lat: tool.location?.coordinates?.[1] || 40.73061,
-            lng: tool.location?.coordinates?.[0] || -73.935242,
-            title: tool.title,
-            subtitle: tool.location?.address
-          }]}
-          height="300px"
-        />
+      {/* Pickup Location Details */}
+      <section className="p-6 rounded-3xl glassmorphism border border-slate-200 dark:border-slate-800 space-y-3">
+        <h3 className="text-xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+          <FiMapPin className="text-primary" /> Pickup Location Details
+        </h3>
+        <p className="text-sm text-slate-600 dark:text-slate-400">
+          This tool is available for pickup in <strong>{formattedAddress || 'New York, NY'}</strong>. Contact owner upon request approval.
+        </p>
       </section>
 
       {/* Booking Modal */}

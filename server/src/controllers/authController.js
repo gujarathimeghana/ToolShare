@@ -3,9 +3,32 @@ const { generateToken } = require('../config/jwt');
 const { sendResponse } = require('../utils/response');
 const { isValidEmail, isStrongPassword } = require('../utils/validators');
 
+const formatManualLocation = (locInput = {}, directFields = {}) => {
+  const city = directFields.city || locInput.city || 'New York';
+  const area = directFields.area || locInput.area || 'Manhattan';
+  const state = directFields.state || locInput.state || 'NY';
+  const pincode = directFields.pincode || locInput.pincode || '';
+  
+  let address = directFields.address || locInput.address;
+  if (!address) {
+    address = [area, city, state].filter(Boolean).join(', ');
+    if (pincode) address += ` - ${pincode}`;
+  }
+
+  return {
+    type: 'Point',
+    coordinates: locInput.coordinates || [-73.935242, 40.73061],
+    city,
+    area,
+    state,
+    pincode,
+    address
+  };
+};
+
 exports.register = async (req, res, next) => {
   try {
-    const { name, email, password, phone, location } = req.body;
+    const { name, email, password, phone, location, city, area, state, pincode } = req.body;
 
     if (!name || !email || !password) {
       return sendResponse(res, 400, false, 'Name, email, and password are required');
@@ -26,13 +49,15 @@ exports.register = async (req, res, next) => {
       return sendResponse(res, 400, false, 'User already exists with this email');
     }
 
+    const formattedLocation = formatManualLocation(location, { city, area, state, pincode });
+
     const user = await User.create({
       name: name.trim(),
       email: cleanEmail,
       password,
       phone: phone || '',
       avatar: '',
-      location: location || { type: 'Point', coordinates: [-73.935242, 40.73061], address: 'New York, NY' }
+      location: formattedLocation
     });
 
     const token = generateToken(user._id, user.role);
@@ -186,9 +211,24 @@ exports.getProfile = async (req, res, next) => {
 
 exports.updateProfile = async (req, res, next) => {
   try {
-    const updates = req.body;
+    const updates = { ...req.body };
     delete updates.password;
     delete updates.role;
+
+    if (updates.city || updates.area || updates.state || updates.pincode || updates.location) {
+      const currentUser = await User.findById(req.user._id);
+      const existingLoc = currentUser.location || {};
+      updates.location = formatManualLocation(updates.location || existingLoc, {
+        city: updates.city,
+        area: updates.area,
+        state: updates.state,
+        pincode: updates.pincode
+      });
+      delete updates.city;
+      delete updates.area;
+      delete updates.state;
+      delete updates.pincode;
+    }
 
     const user = await User.findByIdAndUpdate(req.user._id, updates, { new: true, runValidators: true });
     return sendResponse(res, 200, true, 'Profile updated successfully', user);

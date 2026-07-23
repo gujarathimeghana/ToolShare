@@ -5,7 +5,7 @@ const { sendResponse } = require('../utils/response');
 
 exports.createTool = async (req, res, next) => {
   try {
-    const { title, description, category, categoryName, images, pricePerDay, securityDeposit, condition, location, tags } = req.body;
+    const { title, description, category, categoryName, images, pricePerDay, securityDeposit, condition, location, city, area, state, pincode, tags } = req.body;
 
     if (!title || !description || !pricePerDay) {
       return sendResponse(res, 400, false, 'Title, description, and pricePerDay are required');
@@ -14,7 +14,6 @@ exports.createTool = async (req, res, next) => {
     const catQuery = categoryName || category || 'Power Tools';
     let categoryObj = null;
 
-    // Check if valid 24-character hexadecimal ObjectId
     const isStrictObjectId = typeof catQuery === 'string' && /^[0-9a-fA-F]{24}$/.test(catQuery);
 
     if (isStrictObjectId) {
@@ -40,7 +39,7 @@ exports.createTool = async (req, res, next) => {
     }
 
     if (!categoryObj) {
-      categoryObj = await Category.findOne(); // Fallback to first category in database
+      categoryObj = await Category.findOne();
     }
 
     if (!categoryObj) {
@@ -55,6 +54,13 @@ exports.createTool = async (req, res, next) => {
       ? images
       : ['https://images.unsplash.com/photo-1504148455328-c376907d081c?w=600'];
 
+    const userLoc = req.user.location || {};
+    const toolCity = city || location?.city || userLoc.city || 'New York';
+    const toolArea = area || location?.area || userLoc.area || 'Manhattan';
+    const toolState = state || location?.state || userLoc.state || 'NY';
+    const toolPincode = pincode || location?.pincode || userLoc.pincode || '';
+    const toolAddress = location?.address || [toolArea, toolCity, toolState].filter(Boolean).join(', ') + (toolPincode ? ` - ${toolPincode}` : '');
+
     const tool = await Tool.create({
       title,
       description,
@@ -64,7 +70,15 @@ exports.createTool = async (req, res, next) => {
       securityDeposit: Number(securityDeposit) || 0,
       condition: condition || 'Good',
       owner: req.user._id,
-      location: location || req.user.location || { type: 'Point', coordinates: [-73.935242, 40.73061], address: 'New York, NY' },
+      location: {
+        type: 'Point',
+        coordinates: location?.coordinates || userLoc.coordinates || [-73.935242, 40.73061],
+        city: toolCity,
+        area: toolArea,
+        state: toolState,
+        pincode: toolPincode,
+        address: toolAddress
+      },
       tags: tags || []
     });
 
@@ -83,15 +97,28 @@ exports.createTool = async (req, res, next) => {
 
 exports.getTools = async (req, res, next) => {
   try {
-    const { search, category, minPrice, maxPrice, condition, lat, lng, radius, sort } = req.query;
+    const { search, category, city, area, state, minPrice, maxPrice, condition, sort } = req.query;
 
     const query = {};
 
     if (search) {
       query.$or = [
         { title: { $regex: search, $options: 'i' } },
-        { description: { $regex: search, $options: 'i' } }
+        { description: { $regex: search, $options: 'i' } },
+        { 'location.address': { $regex: search, $options: 'i' } },
+        { 'location.city': { $regex: search, $options: 'i' } },
+        { 'location.area': { $regex: search, $options: 'i' } }
       ];
+    }
+
+    if (city) {
+      query['location.city'] = { $regex: city, $options: 'i' };
+    }
+    if (area) {
+      query['location.area'] = { $regex: area, $options: 'i' };
+    }
+    if (state) {
+      query['location.state'] = { $regex: state, $options: 'i' };
     }
 
     if (category) {
@@ -113,16 +140,6 @@ exports.getTools = async (req, res, next) => {
 
     if (condition) {
       query.condition = condition;
-    }
-
-    if (lat && lng) {
-      const maxDistanceInMeters = (Number(radius) || 25) * 1000;
-      query.location = {
-        $near: {
-          $geometry: { type: 'Point', coordinates: [Number(lng), Number(lat)] },
-          $maxDistance: maxDistanceInMeters
-        }
-      };
     }
 
     let sortOptions = { createdAt: -1 };

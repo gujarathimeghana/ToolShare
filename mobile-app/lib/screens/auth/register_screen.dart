@@ -15,19 +15,35 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _phoneController = TextEditingController();
-  final _cityController = TextEditingController(text: 'New York, NY');
+  final _cityController = TextEditingController();
+  final _areaController = TextEditingController();
+  final _stateController = TextEditingController();
+  final _pincodeController = TextEditingController();
 
   void _handleRegister() async {
     final name = _nameController.text.trim();
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
     final phone = _phoneController.text.trim();
-    final address = _cityController.text.trim();
+    final city = _cityController.text.trim();
+    final area = _areaController.text.trim();
+    final state = _stateController.text.trim();
+    final pincode = _pincodeController.text.trim();
 
     if (name.isEmpty || email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Please fill out Name, Email, and Password.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    if (city.isEmpty || area.isEmpty || state.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter City, Area/Locality, and State.'),
           backgroundColor: Colors.red,
         ),
       );
@@ -43,7 +59,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
       location: {
         'type': 'Point',
         'coordinates': [-73.935242, 40.73061],
-        'address': address.isEmpty ? 'New York, NY' : address,
+        'city': city,
+        'area': area,
+        'state': state,
+        'pincode': pincode,
+        'address': '$area, $city, $state ${pincode.isNotEmpty ? "- $pincode" : ""}'.trim(),
       },
     );
 
@@ -216,18 +236,74 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                     const SizedBox(height: 14),
 
-                    // City / Neighborhood Field
-                    TextField(
-                      controller: _cityController,
-                      style: TextStyle(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.w600),
-                      decoration: InputDecoration(
-                        labelText: 'Neighborhood / City',
-                        hintText: 'e.g. Brooklyn, NY',
-                        prefixIcon: const Icon(Icons.location_on_outlined, color: Color(0xFF4F46E5)),
-                        filled: true,
-                        fillColor: isDark ? const Color(0xFF0F172A) : const Color(0xFFF1F5F9),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(18), borderSide: BorderSide.none),
-                      ),
+                    // Manual Location Inputs
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _cityController,
+                            style: TextStyle(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.w600),
+                            decoration: InputDecoration(
+                              labelText: 'City *',
+                              hintText: 'New York',
+                              prefixIcon: const Icon(Icons.location_city, color: Color(0xFF4F46E5)),
+                              filled: true,
+                              fillColor: isDark ? const Color(0xFF0F172A) : const Color(0xFFF1F5F9),
+                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(18), borderSide: BorderSide.none),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: TextField(
+                            controller: _areaController,
+                            style: TextStyle(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.w600),
+                            decoration: InputDecoration(
+                              labelText: 'Area / Locality *',
+                              hintText: 'Manhattan',
+                              prefixIcon: const Icon(Icons.map, color: Color(0xFF4F46E5)),
+                              filled: true,
+                              fillColor: isDark ? const Color(0xFF0F172A) : const Color(0xFFF1F5F9),
+                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(18), borderSide: BorderSide.none),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 14),
+
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _stateController,
+                            style: TextStyle(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.w600),
+                            decoration: InputDecoration(
+                              labelText: 'State *',
+                              hintText: 'NY',
+                              prefixIcon: const Icon(Icons.flag, color: Color(0xFF4F46E5)),
+                              filled: true,
+                              fillColor: isDark ? const Color(0xFF0F172A) : const Color(0xFFF1F5F9),
+                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(18), borderSide: BorderSide.none),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: TextField(
+                            controller: _pincodeController,
+                            style: TextStyle(color: isDark ? Colors.white : const Color(0xFF0F172A), fontWeight: FontWeight.w600),
+                            decoration: InputDecoration(
+                              labelText: 'PIN Code',
+                              hintText: '10001',
+                              prefixIcon: const Icon(Icons.pin_drop, color: Color(0xFF4F46E5)),
+                              filled: true,
+                              fillColor: isDark ? const Color(0xFF0F172A) : const Color(0xFFF1F5F9),
+                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(18), borderSide: BorderSide.none),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 24),
 

@@ -4,7 +4,6 @@ import HeroSection from '../components/HeroSection';
 import ToolCard from '../components/ToolCard';
 import HelperCard from '../components/HelperCard';
 import CategoryBadge from '../components/CategoryBadge';
-import OpenStreetMap from '../components/OpenStreetMap';
 import SkeletonLoader from '../components/SkeletonLoader';
 import api from '../services/api';
 import { FiCheckCircle, FiShield, FiHeart, FiZap, FiArrowRight } from 'react-icons/fi';
@@ -34,13 +33,6 @@ const LandingPage = () => {
     };
     fetchData();
   }, []);
-
-  const mapMarkers = tools.map((t) => ({
-    lat: t.location?.coordinates?.[1] || 40.73061,
-    lng: t.location?.coordinates?.[0] || -73.935242,
-    title: t.title,
-    subtitle: `$${t.pricePerDay}/day`
-  }));
 
   return (
     <div className="space-y-24 pb-20">
@@ -72,23 +64,18 @@ const LandingPage = () => {
         )}
       </section>
 
-      {/* Featured Tools & Map View */}
+      {/* Featured Tools */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between mb-8">
           <div>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">
               Nearby Tools Available Now
             </h2>
-            <p className="text-sm text-slate-500 mt-1">Rent from verified neighbors right in your zip code.</p>
+            <p className="text-sm text-slate-500 mt-1">Rent from verified neighbors right in your area.</p>
           </div>
           <Link to="/tools" className="flex items-center gap-1 text-sm font-bold text-primary hover:underline">
             Browse All Tools <FiArrowRight />
           </Link>
-        </div>
-
-        {/* Interactive Map Preview */}
-        <div className="mb-10">
-          <OpenStreetMap markers={mapMarkers} height="320px" />
         </div>
 
         {loading ? (

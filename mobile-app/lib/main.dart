@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'core/theme.dart';
 import 'providers/auth_provider.dart';
 import 'providers/tool_provider.dart';
+import 'providers/booking_provider.dart';
 import 'providers/theme_provider.dart';
 import 'screens/splash_screen.dart';
 
@@ -12,6 +13,7 @@ void main() {
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => ToolProvider()),
+        ChangeNotifierProvider(create: (_) => BookingProvider()),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
       ],
       child: const NeighborlyApp(),

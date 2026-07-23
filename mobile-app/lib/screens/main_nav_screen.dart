@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'home/home_screen.dart';
 import 'map/nearby_map_screen.dart';
+import 'requests/requests_screen.dart';
 import 'search/search_screen.dart';
 import 'profile/profile_screen.dart';
 import 'tools/add_tool_screen.dart';
@@ -18,8 +19,8 @@ class _MainNavScreenState extends State<MainNavScreen> {
   final List<Widget> _screens = const [
     HomeScreen(),
     NearbyMapScreen(),
+    RequestsScreen(),
     AddToolScreen(),
-    SearchScreen(),
     ProfileScreen(),
   ];
 
@@ -49,9 +50,9 @@ class _MainNavScreenState extends State<MainNavScreen> {
           selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11),
           items: const [
             BottomNavigationBarItem(icon: Icon(Icons.home_outlined), activeIcon: Icon(Icons.home), label: 'Home'),
-            BottomNavigationBarItem(icon: Icon(Icons.map_outlined), activeIcon: Icon(Icons.map), label: 'Nearby Map'),
+            BottomNavigationBarItem(icon: Icon(Icons.location_on_outlined), activeIcon: Icon(Icons.location_on), label: 'Location'),
+            BottomNavigationBarItem(icon: Icon(Icons.swap_horiz_rounded), activeIcon: Icon(Icons.swap_horizontal_circle), label: 'Requests'),
             BottomNavigationBarItem(icon: Icon(Icons.add_circle_outline, size: 28), activeIcon: Icon(Icons.add_circle, size: 28), label: 'List Tool'),
-            BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Explore'),
             BottomNavigationBarItem(icon: Icon(Icons.person_outline), activeIcon: Icon(Icons.person), label: 'Profile'),
           ],
         ),
