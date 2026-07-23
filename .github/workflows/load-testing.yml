@@ -1,4 +1,4 @@
-name: Backend Load Testing
+name: Load Testing
 
 on:
   push:
@@ -6,8 +6,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  k6-backend-load-test:
-    name: k6 REST API Baseline Load Test (100 VUs / 60s)
+  k6-load-test:
+    name: Grafana k6 REST API Baseline Load Test (100 VUs / 60s)
     runs-on: ubuntu-latest
 
     steps:
@@ -22,13 +22,13 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y k6
 
-      - name: Execute k6 Backend API Load Test
+      - name: Execute k6 Load Test (100 VUs for 1 Minute)
         env:
           API_URL: 'https://toolshare-production-e02e.up.railway.app/api'
         run: |
           k6 run server/tests/k6-backend-load.js
 
-      - name: Publish k6 Summary to GitHub Step Summary
+      - name: Publish Load Testing Summary to GitHub Step Summary
         run: |
           if [ -f load_test_summary.md ]; then
             cat load_test_summary.md >> $GITHUB_STEP_SUMMARY
@@ -37,7 +37,7 @@ jobs:
       - name: Upload k6 Load Testing Artifacts (HTML, JSON, Markdown)
         uses: actions/upload-artifact@v4
         with:
-          name: k6-backend-load-test-reports
+          name: k6-load-testing-reports
           path: |
             load_test_report.html
             load_test_report.json
