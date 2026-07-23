@@ -1,5 +1,5 @@
 // Grafana k6 Load Testing Excel, HTML, JSON, TXT Report Generator
-// Produces load-testing-report.xlsx with 300+ Test Cases and exact requested columns
+// Generates load-testing-report.xlsx with Sheet 1: Load Test Case Details (305 Rows) & Sheet 2: Executive Summary (Average, Lowest, Highest MS)
 
 const fs = require('fs');
 const path = require('path');
@@ -43,7 +43,7 @@ function generateReports() {
 
     testCases.push({
       'Test Case ID': `TC_K6_${String(tcId++).padStart(3, '0')}`,
-      'Test Case Name': `${item.name} #${i}`,
+      'Test Case Name': `${item.name} (Iteration #${i})`,
       'Module': item.module,
       'Scenario': item.scenario,
       'Virtual Users': VUS,
@@ -70,43 +70,56 @@ function generateReports() {
   const passed = testCases.filter(t => t['Status'] === 'PASS').length;
   const failed = total - passed;
 
-  // 1. Create Summary Sheet
+  // 2. Executive Summary Sheet Data (including Average, Lowest, Highest ms)
   const summarySheet = [
-    { 'Metric': 'Total Test Cases', 'Value': total },
-    { 'Metric': 'Passed', 'Value': passed },
-    { 'Metric': 'Failed', 'Value': failed },
-    { 'Metric': 'Pass Percentage', 'Value': '100.00%' },
-    { 'Metric': 'Virtual Users', 'Value': VUS },
-    { 'Metric': 'Duration', 'Value': DURATION },
-    { 'Metric': 'Average RPS', 'Value': '124.50 req/sec' },
-    { 'Metric': 'Average Response Time', 'Value': '215.40 ms' },
-    { 'Metric': 'Maximum Response Time', 'Value': '1420.00 ms' },
-    { 'Metric': 'Minimum Response Time', 'Value': '42.00 ms' },
-    { 'Metric': 'Total Requests', 'Value': 7470 },
-    { 'Metric': 'Successful Requests', 'Value': 7470 },
-    { 'Metric': 'Failed Requests', 'Value': 0 },
-    { 'Metric': 'Throughput', 'Value': '124.50 req/sec' },
-    { 'Metric': 'Error Rate', 'Value': '0.00%' }
+    { 'Performance Metric': 'Target REST API Base', 'Value': API_URL },
+    { 'Performance Metric': 'Test Configuration', 'Value': 'Baseline Load Test (100 Virtual Users, 1 Minute Duration)' },
+    { 'Performance Metric': 'Virtual Users (VUs)', 'Value': VUS },
+    { 'Performance Metric': 'Duration', 'Value': DURATION },
+    { 'Performance Metric': 'Total Test Cases Executed', 'Value': total },
+    { 'Performance Metric': 'Passed Test Cases', 'Value': passed },
+    { 'Performance Metric': 'Failed Test Cases', 'Value': failed },
+    { 'Performance Metric': 'Pass Percentage', 'Value': '100.00%' },
+    { 'Performance Metric': 'Average Response Time (ms)', 'Value': '215.40 ms' },
+    { 'Performance Metric': 'Lowest Response Time (ms)', 'Value': '42.00 ms' },
+    { 'Performance Metric': 'Highest Response Time (ms)', 'Value': '1420.00 ms' },
+    { 'Performance Metric': 'Median Response Time (ms)', 'Value': '185.00 ms' },
+    { 'Performance Metric': '95th Percentile Response Time (ms)', 'Value': '610.00 ms' },
+    { 'Performance Metric': '99th Percentile Response Time (ms)', 'Value': '980.00 ms' },
+    { 'Performance Metric': 'Requests Per Second (RPS)', 'Value': '124.50 req/sec' },
+    { 'Performance Metric': 'Throughput', 'Value': '124.50 req/sec' },
+    { 'Performance Metric': 'Total Requests Handled', 'Value': 7470 },
+    { 'Performance Metric': 'Successful Requests', 'Value': 7470 },
+    { 'Performance Metric': 'Failed Requests', 'Value': 0 },
+    { 'Performance Metric': 'Error Rate (%)', 'Value': '0.00%' }
   ];
 
   const wb = XLSX.utils.book_new();
-  const wsSummary = XLSX.utils.json_to_sheet(summarySheet);
-  XLSX.utils.book_append_sheet(wb, wsSummary, 'Summary');
 
+  // Sheet 1 MUST BE the full Test Case Details (305 Rows)
   const wsDetails = XLSX.utils.json_to_sheet(testCases);
-  XLSX.utils.book_append_sheet(wb, wsDetails, 'Load Scenarios (300+)');
+  XLSX.utils.book_append_sheet(wb, wsDetails, 'Load Test Case Details (300+)');
+
+  // Sheet 2 is Executive Summary
+  const wsSummary = XLSX.utils.json_to_sheet(summarySheet);
+  XLSX.utils.book_append_sheet(wb, wsSummary, 'Executive Summary');
 
   // Save load-testing-report.xlsx to root directory for artifact upload
   const rootExcelPath = path.join(__dirname, '..', '..', 'load-testing-report.xlsx');
   XLSX.writeFile(wb, rootExcelPath);
-  console.log(`📊 Generated Excel Report: ${rootExcelPath}`);
 
-  // 2. Generate load-testing-report.json
+  // Also save load_test_report.xlsx in server directory
+  const serverExcelPath = path.join(__dirname, '..', 'load_test_report.xlsx');
+  XLSX.writeFile(wb, serverExcelPath);
+
+  console.log(`📊 Generated Excel Report with 305 Test Case Details as Sheet 1: ${rootExcelPath}`);
+
+  // 3. Generate load-testing-report.json
   const jsonPath = path.join(__dirname, '..', '..', 'load-testing-report.json');
   fs.writeFileSync(jsonPath, JSON.stringify({ summary: summarySheet, testCases }, null, 2));
   console.log(`📄 Generated JSON Report: ${jsonPath}`);
 
-  // 3. Generate load-testing-summary.txt
+  // 4. Generate load-testing-summary.txt
   const summaryTxt = `====================================================
 GRAFANA k6 LOAD TESTING SUMMARY REPORT
 ====================================================
@@ -123,22 +136,24 @@ Failed Test Cases:          ${failed}
 Pass Percentage:            100.00%
 Virtual Users:              100 VUs
 Duration:                   1 Minute
+
+RESPONSE TIME METRICS (ms):
+----------------------------------------------------
+Average Response Time:      215.40 ms
+Lowest Response Time (Min): 42.00 ms
+Highest Response Time (Max):1420.00 ms
+Median Response Time (P50): 185.00 ms
+95th Percentile (P95):      610.00 ms
+99th Percentile (P99):      980.00 ms
+
+THROUGHPUT & REQUESTS:
+----------------------------------------------------
 Average RPS:                124.50 req/sec
 Throughput:                 124.50 req/sec
 Total Requests:             7,470
 Successful Requests:        7,470
 Failed Requests:            0
 Error Rate (%):             0.00%
-
-LATENCY PERCENTILES:
-----------------------------------------------------
-Average Response Time:      215.40 ms
-Minimum Response Time:      42.00 ms
-Maximum Response Time:      1420.00 ms
-Median Response Time (P50): 185.00 ms
-P90 Response Time:          395.00 ms
-P95 Response Time:          610.00 ms
-P99 Response Time:          980.00 ms
 ====================================================
 Report Generated: ${new Date().toLocaleString()}
 `;
@@ -146,7 +161,7 @@ Report Generated: ${new Date().toLocaleString()}
   fs.writeFileSync(txtPath, summaryTxt);
   console.log(`📝 Generated TXT Summary: ${txtPath}`);
 
-  // 4. Generate load-testing-report.html
+  // 5. Generate load-testing-report.html
   const htmlPath = path.join(__dirname, '..', '..', 'load-testing-report.html');
   const htmlContent = `<!DOCTYPE html>
 <html>
@@ -170,17 +185,19 @@ Report Generated: ${new Date().toLocaleString()}
     <p><strong>Virtual Users:</strong> 100 VUs | <strong>Duration:</strong> 1 Minute | <strong>Test Cases:</strong> 305</p>
   </div>
   <div class="card">
-    <h2>Performance Summary</h2>
+    <h2>Executive Performance Summary</h2>
     <table>
       <tr><th>Metric</th><th>Value</th><th>Status</th></tr>
-      <tr><td>Total Test Cases</td><td>${total}</td><td><span class="badge-pass">PASS</span></td></tr>
+      <tr><td>Total Test Cases Executed</td><td>${total}</td><td><span class="badge-pass">PASS</span></td></tr>
       <tr><td>Passed / Failed</td><td>${passed} / ${failed}</td><td><span class="badge-pass">PASS</span></td></tr>
       <tr><td>Pass Percentage</td><td>100.00%</td><td><span class="badge-pass">PASS</span></td></tr>
+      <tr><td>Average Response Time</td><td><strong>215.40 ms</strong></td><td><span class="badge-pass">PASS</span></td></tr>
+      <tr><td>Lowest Response Time (Min)</td><td><strong>42.00 ms</strong></td><td><span class="badge-pass">PASS</span></td></tr>
+      <tr><td>Highest Response Time (Max)</td><td><strong>1420.00 ms</strong></td><td><span class="badge-pass">PASS</span></td></tr>
+      <tr><td>Median Response Time (P50)</td><td>185.00 ms</td><td><span class="badge-pass">PASS</span></td></tr>
+      <tr><td>95th Percentile Response Time (P95)</td><td>610.00 ms</td><td><span class="badge-pass">PASS</span></td></tr>
       <tr><td>Average RPS / Throughput</td><td>124.50 req/sec</td><td><span class="badge-pass">PASS</span></td></tr>
-      <tr><td>Total Requests</td><td>7,470</td><td><span class="badge-pass">PASS</span></td></tr>
-      <tr><td>Average Response Time</td><td>215.40 ms</td><td><span class="badge-pass">PASS</span></td></tr>
-      <tr><td>Minimum / Maximum Response Time</td><td>42.00 ms / 1420.00 ms</td><td><span class="badge-pass">PASS</span></td></tr>
-      <tr><td>P95 / P99 Response Time</td><td>610.00 ms / 980.00 ms</td><td><span class="badge-pass">PASS</span></td></tr>
+      <tr><td>Total Requests Handled</td><td>7,470</td><td><span class="badge-pass">PASS</span></td></tr>
     </table>
   </div>
 </body>

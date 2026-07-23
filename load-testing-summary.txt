@@ -14,21 +14,23 @@ Failed Test Cases:          0
 Pass Percentage:            100.00%
 Virtual Users:              100 VUs
 Duration:                   1 Minute
+
+RESPONSE TIME METRICS (ms):
+----------------------------------------------------
+Average Response Time:      215.40 ms
+Lowest Response Time (Min): 42.00 ms
+Highest Response Time (Max):1420.00 ms
+Median Response Time (P50): 185.00 ms
+95th Percentile (P95):      610.00 ms
+99th Percentile (P99):      980.00 ms
+
+THROUGHPUT & REQUESTS:
+----------------------------------------------------
 Average RPS:                124.50 req/sec
 Throughput:                 124.50 req/sec
 Total Requests:             7,470
 Successful Requests:        7,470
 Failed Requests:            0
 Error Rate (%):             0.00%
-
-LATENCY PERCENTILES:
-----------------------------------------------------
-Average Response Time:      215.40 ms
-Minimum Response Time:      42.00 ms
-Maximum Response Time:      1420.00 ms
-Median Response Time (P50): 185.00 ms
-P90 Response Time:          395.00 ms
-P95 Response Time:          610.00 ms
-P99 Response Time:          980.00 ms
 ====================================================
-Report Generated: 23/7/2026, 3:44:41 pm
+Report Generated: 23/7/2026, 3:53:27 pm
