@@ -29,6 +29,9 @@ const io = new Server(server, {
 });
 initSocketIO(io);
 
+// Store io instance on app for controllers (req.app.get('io'))
+app.set('io', io);
+
 // Security & Utility Middlewares
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use(cors());
