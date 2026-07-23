@@ -14,6 +14,16 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      - name: Setup Node.js Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Server Dependencies
+        run: |
+          cd server
+          npm install
+
       - name: Install Grafana k6 Load Testing CLI
         run: |
           sudo gpg -k || true
@@ -28,13 +38,18 @@ jobs:
         run: |
           k6 run server/tests/k6-backend-load.js
 
+      - name: Generate Excel & JSON Reports (300+ Scenarios)
+        run: |
+          cd server
+          node tests/generate-load-reports.js
+
       - name: Publish Load Testing Summary to GitHub Step Summary
         run: |
           if [ -f load_test_summary.md ]; then
             cat load_test_summary.md >> $GITHUB_STEP_SUMMARY
           fi
 
-      - name: Upload k6 Load Testing Artifacts (HTML, JSON, Markdown)
+      - name: Upload k6 & Excel Load Testing Artifacts (HTML, JSON, XLSX, Markdown)
         uses: actions/upload-artifact@v4
         with:
           name: k6-load-testing-reports
@@ -42,3 +57,4 @@ jobs:
             load_test_report.html
             load_test_report.json
             load_test_summary.md
+            server/load_test_report.xlsx

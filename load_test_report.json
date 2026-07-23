@@ -1,0 +1,129 @@
+{
+  "summary": [
+    {
+      "Metric": "Target Base API",
+      "Value": "https://toolshare-production-e02e.up.railway.app/api"
+    },
+    {
+      "Metric": "Test Configuration",
+      "Value": "Baseline Load Test (100 VUs, 10s Ramp-up, 50s Constant Load)"
+    },
+    {
+      "Metric": "Concurrent Virtual Users (VUs)",
+      "Value": 100
+    },
+    {
+      "Metric": "Test Duration",
+      "Value": "60 Seconds (1 Minute)"
+    },
+    {
+      "Metric": "Ramp-up Duration",
+      "Value": "10 Seconds"
+    },
+    {
+      "Metric": "Total Scenarios Executed",
+      "Value": 305
+    },
+    {
+      "Metric": "Passed Scenarios",
+      "Value": 305
+    },
+    {
+      "Metric": "Failed Scenarios",
+      "Value": 0
+    },
+    {
+      "Metric": "Pass Percentage",
+      "Value": "100.00%"
+    },
+    {
+      "Metric": "Requests Per Second (RPS)",
+      "Value": "124.50 req/sec"
+    },
+    {
+      "Metric": "Throughput",
+      "Value": "124.50 req/sec"
+    },
+    {
+      "Metric": "Total Requests Handled",
+      "Value": 7470
+    },
+    {
+      "Metric": "Successful Requests",
+      "Value": 7470
+    },
+    {
+      "Metric": "Failed Requests",
+      "Value": 0
+    },
+    {
+      "Metric": "Error Rate (%)",
+      "Value": "0.00%"
+    },
+    {
+      "Metric": "Average Response Time",
+      "Value": "215.40 ms"
+    },
+    {
+      "Metric": "Minimum Response Time",
+      "Value": "42.00 ms"
+    },
+    {
+      "Metric": "Maximum Response Time",
+      "Value": "1420.00 ms"
+    },
+    {
+      "Metric": "Median Response Time (P50)",
+      "Value": "185.00 ms"
+    },
+    {
+      "Metric": "90th Percentile (P90)",
+      "Value": "395.00 ms"
+    },
+    {
+      "Metric": "95th Percentile (P95)",
+      "Value": "610.00 ms"
+    },
+    {
+      "Metric": "99th Percentile (P99)",
+      "Value": "980.00 ms"
+    },
+    {
+      "Metric": "Network Data Sent",
+      "Value": "1890.50 KB"
+    },
+    {
+      "Metric": "Network Data Received",
+      "Value": "15420.80 KB"
+    },
+    {
+      "Metric": "CPU Usage (Peak)",
+      "Value": "18.4%"
+    },
+    {
+      "Metric": "Memory Usage (Peak)",
+      "Value": "142 MB"
+    },
+    {
+      "Metric": "Report Date",
+      "Value": "23/7/2026, 3:26:44 pm"
+    }
+  ],
+  "metrics": {
+    "vus": 100,
+    "duration": 60,
+    "total_requests": 7470,
+    "rps": 124.5,
+    "avg_response_time_ms": 215.4,
+    "min_response_time_ms": 42,
+    "max_response_time_ms": 1420,
+    "median_response_time_ms": 185,
+    "p90_ms": 395,
+    "p95_ms": 610,
+    "p99_ms": 980,
+    "error_rate": 0,
+    "data_sent_kb": 1890.5,
+    "data_received_kb": 15420.8
+  },
+  "scenarios_executed": 305
+}
