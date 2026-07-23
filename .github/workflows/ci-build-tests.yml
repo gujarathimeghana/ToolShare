@@ -1,0 +1,55 @@
+name: CI Build & Automated Tests Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  backend-unit-tests:
+    name: Backend Server Unit Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Backend Dependencies
+        run: |
+          cd server
+          npm install
+
+      - name: Run Backend Unit Tests
+        run: |
+          cd server
+          npm test
+
+  web-frontend-build:
+    name: Web Frontend Build Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Web Frontend Dependencies
+        run: |
+          cd client-web
+          npm install
+
+      - name: Build Web Application
+        run: |
+          cd client-web
+          npm run build
