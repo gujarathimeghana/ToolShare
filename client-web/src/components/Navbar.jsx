@@ -1,15 +1,48 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FiSun, FiMoon, FiMenu, FiX, FiSearch, FiHeart, FiMessageSquare, FiUser, FiLogOut, FiPlusCircle } from 'react-icons/fi';
+import { FiSun, FiMoon, FiMenu, FiX, FiBell, FiPlusCircle, FiLogOut, FiCheckCircle } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import UserAvatar from './UserAvatar';
+import api from '../services/api';
 
 const Navbar = () => {
   const { user, logout, isAuthenticated, isAdmin } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [showNotifications, setShowNotifications] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchNotifications();
+      const interval = setInterval(fetchNotifications, 10000); // Refresh notifications every 10s
+      return () => clearInterval(interval);
+    }
+  }, [isAuthenticated]);
+
+  const fetchNotifications = async () => {
+    try {
+      const res = await api.get('/notifications');
+      if (res.data && res.data.success) {
+        setNotifications(res.data.data || []);
+      }
+    } catch (err) {
+      console.error('Fetch notifications error:', err);
+    }
+  };
+
+  const markAllRead = async () => {
+    try {
+      await api.put('/notifications/read-all');
+      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    } catch (err) {
+      console.error('Mark read error:', err);
+    }
+  };
+
+  const unreadCount = notifications.filter((n) => !n.read).length;
 
   return (
     <nav className="sticky top-0 z-40 glassmorphism border-b border-slate-200/80 dark:border-slate-800/80 transition-colors duration-200 backdrop-blur-xl">
@@ -39,9 +72,6 @@ const Navbar = () => {
             <Link to="/how-it-works" className="text-sm font-bold text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
               How it Works
             </Link>
-            <Link to="/about" className="text-sm font-bold text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
-              About
-            </Link>
           </div>
 
           {/* Actions & Profile */}
@@ -56,6 +86,60 @@ const Navbar = () => {
 
             {isAuthenticated ? (
               <>
+                {/* Notifications Bell */}
+                <div className="relative">
+                  <button
+                    onClick={() => {
+                      setShowNotifications(!showNotifications);
+                      if (unreadCount > 0) markAllRead();
+                    }}
+                    className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors relative"
+                    title="Notifications"
+                  >
+                    <FiBell className="text-lg" />
+                    {unreadCount > 0 && (
+                      <span className="absolute -top-1 -right-1 w-5 h-5 bg-rose-500 text-white text-xs font-black rounded-full flex items-center justify-center animate-pulse">
+                        {unreadCount}
+                      </span>
+                    )}
+                  </button>
+
+                  {/* Notifications Dropdown */}
+                  {showNotifications && (
+                    <div className="absolute right-0 mt-3 w-80 rounded-2xl glassmorphism border border-slate-200 dark:border-slate-800 shadow-2xl p-4 space-y-3 z-50">
+                      <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
+                        <h4 className="font-extrabold text-sm text-slate-900 dark:text-white">Notifications</h4>
+                        <span className="text-xs text-indigo-500 font-bold">{notifications.length} total</span>
+                      </div>
+
+                      <div className="max-h-60 overflow-y-auto space-y-2">
+                        {notifications.length === 0 ? (
+                          <p className="text-xs text-slate-500 text-center py-4">No notifications yet.</p>
+                        ) : (
+                          notifications.map((n) => (
+                            <div
+                              key={n._id}
+                              className={`p-2.5 rounded-xl border text-xs space-y-1 ${
+                                n.read
+                                  ? 'bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-800'
+                                  : 'bg-indigo-50/50 dark:bg-indigo-950/30 border-indigo-200 dark:border-indigo-800'
+                              }`}
+                            >
+                              <div className="flex items-center justify-between">
+                                <span className="font-bold text-slate-900 dark:text-white">{n.title}</span>
+                                <span className="text-[10px] text-slate-400">
+                                  {new Date(n.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                </span>
+                              </div>
+                              <p className="text-slate-600 dark:text-slate-300">{n.message}</p>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
                 <Link
                   to="/dashboard/add-tool"
                   className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-extrabold text-white btn-gradient shadow-md shadow-indigo-500/20 hover:scale-105 transition-transform"
@@ -150,13 +234,6 @@ const Navbar = () => {
             className="block py-2 text-base font-bold text-slate-700 dark:text-slate-200 hover:text-indigo-600"
           >
             Categories
-          </Link>
-          <Link
-            to="/how-it-works"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block py-2 text-base font-bold text-slate-700 dark:text-slate-200 hover:text-indigo-600"
-          >
-            How it Works
           </Link>
 
           {isAuthenticated ? (
