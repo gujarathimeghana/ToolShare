@@ -41,3 +41,15 @@ jobs:
         with:
           name: neighborly-app-release
           path: mobile-app/build/app/outputs/flutter-apk/app-release.apk
+
+      - name: Create Public GitHub Release with Direct APK Download
+        uses: softprops/action-gh-release@v2
+        if: github.ref == 'refs/heads/main'
+        with:
+          tag_name: v1.0.0
+          name: Neighborly Mobile App Release v1.0.0
+          body: |
+            Direct APK download for Neighborly Tool Share Mobile Application.
+          files: mobile-app/build/app/outputs/flutter-apk/app-release.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
