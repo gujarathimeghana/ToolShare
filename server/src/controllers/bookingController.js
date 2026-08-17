@@ -113,6 +113,11 @@ exports.updateBookingStatus = async (req, res, next) => {
       return sendResponse(res, 404, false, 'Booking request not found');
     }
 
+    const userId = req.user._id.toString();
+    if (booking.owner.toString() !== userId && booking.renter.toString() !== userId) {
+      return sendResponse(res, 403, false, 'You are not authorized to update this booking request');
+    }
+
     if (status) booking.status = status;
     if (paymentStatus) booking.paymentStatus = paymentStatus;
     if (returnConfirmed !== undefined) booking.returnConfirmed = returnConfirmed;
@@ -125,11 +130,12 @@ exports.updateBookingStatus = async (req, res, next) => {
 
     await booking.save();
 
-    // Send status update notification to renter
+    // Send status update notification to other party
+    const targetUserId = booking.renter.toString() === userId ? booking.owner : booking.renter;
     await Notification.create({
-      user: booking.renter,
+      user: targetUserId,
       title: 'Booking Status Updated',
-      message: `Your request for ${booking.tool.title} was updated to ${booking.status}`,
+      message: `Request for ${booking.tool.title} was updated to ${booking.status}`,
       type: 'approval',
       data: { bookingId: booking._id }
     });
