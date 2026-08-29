@@ -1,11 +1,32 @@
 const Category = require('../models/Category');
 const { sendResponse } = require('../utils/response');
 
+const DEFAULT_CATEGORIES = [
+  { name: 'Power Tools', slug: 'power-tools', icon: 'Zap', type: 'tool', description: 'Drills, saws, sanders, and power equipment' },
+  { name: 'Hand Tools', slug: 'hand-tools', icon: 'Hammer', type: 'tool', description: 'Wrenches, hammers, screwdrivers, and pliers' },
+  { name: 'Gardening', slug: 'gardening', icon: 'Sprout', type: 'tool', description: 'Lawn mowers, trimmers, shovels, and garden gear' },
+  { name: 'Construction', slug: 'construction', icon: 'HardHat', type: 'tool', description: 'Ladders, cement mixers, scaffolding, and safety gear' },
+  { name: 'Automotive', slug: 'automotive', icon: 'Car', type: 'tool', description: 'Jacks, OBD scanners, torque wrenches, and chargers' },
+  { name: 'Electrical', slug: 'electrical', icon: 'Cpu', type: 'tool', description: 'Multimeters, wire strippers, voltage testers, and fish tape' },
+  { name: 'Plumbing', slug: 'plumbing', icon: 'Wrench', type: 'tool', description: 'Pipe wrenches, snakes, crimpers, and plunger tools' },
+  { name: 'Cleaning', slug: 'cleaning', icon: 'Sparkles', type: 'tool', description: 'Pressure washers, steam cleaners, and shop vacs' },
+  { name: 'Kitchen', slug: 'kitchen', icon: 'Utensils', type: 'tool', description: 'Specialty food prep tools, mixers, and appliances' },
+  { name: 'Home Improvement', slug: 'home-improvement', icon: 'Home', type: 'tool', description: 'Paint sprayers, wallpaper tools, and flooring gear' },
+  { name: 'Outdoor', slug: 'outdoor', icon: 'Sun', type: 'tool', description: 'Camping equipment, drills, and outdoor gear' },
+  { name: 'Other', slug: 'other', icon: 'Package', type: 'tool', description: 'Miscellaneous tools and equipment' }
+];
+
 exports.getCategories = async (req, res, next) => {
   try {
     const { type } = req.query;
     const filter = type ? { type } : {};
-    const categories = await Category.find(filter).sort({ name: 1 });
+    let categories = await Category.find(filter).sort({ name: 1 });
+
+    if (categories.length === 0 && (!type || type === 'tool')) {
+      // Auto seed default categories in MongoDB Atlas if empty
+      categories = await Category.insertMany(DEFAULT_CATEGORIES);
+    }
+
     return sendResponse(res, 200, true, 'Categories fetched', categories);
   } catch (error) {
     next(error);

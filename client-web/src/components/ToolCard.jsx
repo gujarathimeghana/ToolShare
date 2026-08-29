@@ -6,6 +6,7 @@ import UserAvatar from './UserAvatar';
 
 const ToolCard = ({ tool, onFavoriteToggle, isFavorite = false }) => {
   const ownerName = tool.owner?.name || 'Neighbor';
+  const categoryDisplayName = tool.category?.name || tool.categoryName || (typeof tool.category === 'string' ? tool.category : 'Tool');
 
   return (
     <div className="group rounded-3xl glassmorphism border border-slate-200/80 dark:border-slate-800/80 overflow-hidden hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-300 flex flex-col justify-between hover:-translate-y-1">
@@ -34,7 +35,7 @@ const ToolCard = ({ tool, onFavoriteToggle, isFavorite = false }) => {
         <div className="p-5 space-y-3">
           <div className="flex items-center justify-between gap-2">
             <span className="text-xs font-black uppercase tracking-wider text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 px-2.5 py-1 rounded-lg">
-              {tool.category?.name || 'Tool'}
+              {categoryDisplayName}
             </span>
             <RatingStars rating={tool.rating} count={tool.reviewCount} />
           </div>
