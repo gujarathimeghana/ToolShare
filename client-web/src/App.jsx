@@ -32,22 +32,9 @@ import { useAuth } from './context/AuthContext';
 
 const ProtectedRoute = ({ children, adminOnly = false }) => {
   const { isAuthenticated, isAdmin, loading } = useAuth();
-  if (loading) {
-    return (
-      <div className="max-w-7xl mx-auto px-4 py-20 text-center text-slate-500 font-bold">
-        Loading authentication state...
-      </div>
-    );
-  }
+  if (loading) return null;
   if (!isAuthenticated) return <Navigate to="/login" replace />;
   if (adminOnly && !isAdmin) return <Navigate to="/dashboard" replace />;
-  return children;
-};
-
-const AuthRoute = ({ children }) => {
-  const { isAuthenticated, loading } = useAuth();
-  if (loading) return null;
-  if (isAuthenticated) return <Navigate to="/dashboard" replace />;
   return children;
 };
 
@@ -72,22 +59,8 @@ function App() {
           <Route path="/contact" element={<ContactPage />} />
 
           {/* Auth Routes */}
-          <Route
-            path="/login"
-            element={
-              <AuthRoute>
-                <LoginPage />
-              </AuthRoute>
-            }
-          />
-          <Route
-            path="/register"
-            element={
-              <AuthRoute>
-                <RegisterPage />
-              </AuthRoute>
-            }
-          />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
           {/* Dashboard Nested Routes */}

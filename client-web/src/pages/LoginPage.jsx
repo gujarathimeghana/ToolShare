@@ -28,6 +28,7 @@ const LoginPage = () => {
       showToast('Welcome back to Neighborly!', 'success');
       navigate('/dashboard');
     } catch (err) {
+      console.error('Login error:', err);
       showToast(err.message || 'Invalid email or password', 'error');
     } finally {
       setLoading(false);
@@ -37,12 +38,7 @@ const LoginPage = () => {
   const handleGoogleAuth = async () => {
     setGoogleLoading(true);
     try {
-      await googleLogin({
-        email: email.trim() || 'meghana.google@saveetha.com',
-        name: 'GUJARATHI MEGHANA',
-        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
-        googleId: 'google_' + Date.now()
-      });
+      await googleLogin();
       showToast('Signed in successfully with Google!', 'success');
       navigate('/dashboard');
     } catch (err) {
