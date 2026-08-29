@@ -55,7 +55,11 @@ const RegisterPage = () => {
       showToast('Registration successful! Welcome to Neighborly.', 'success');
       navigate('/dashboard');
     } catch (err) {
-      showToast(err.message || 'Registration failed', 'error');
+      if (import.meta.env.DEV) {
+        console.error('[Registration Error Details]:', err);
+      }
+      const msg = err.response?.data?.message || err.message || 'Registration failed. Please try again.';
+      showToast(msg, 'error');
     } finally {
       setLoading(false);
     }

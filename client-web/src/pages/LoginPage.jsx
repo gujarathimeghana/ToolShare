@@ -2,13 +2,14 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useNotification } from '../context/NotificationContext';
-import { FiMail, FiLock, FiArrowRight, FiShield, FiCheckCircle } from 'react-icons/fi';
+import { FiMail, FiLock, FiArrowRight } from 'react-icons/fi';
 import { FcGoogle } from 'react-icons/fc';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
 
   const { login, googleLogin } = useAuth();
   const { showToast } = useNotification();
@@ -34,16 +35,21 @@ const LoginPage = () => {
   };
 
   const handleGoogleAuth = async () => {
+    setGoogleLoading(true);
     try {
       await googleLogin({
-        email: 'user.google@neighborly.app',
-        name: 'Neighbor User',
+        email: email.trim() || 'meghana.google@saveetha.com',
+        name: 'GUJARATHI MEGHANA',
+        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
         googleId: 'google_' + Date.now()
       });
-      showToast('Google Sign-in successful!', 'success');
+      showToast('Signed in successfully with Google!', 'success');
       navigate('/dashboard');
     } catch (err) {
-      showToast('Google auth failed', 'error');
+      console.error('Google auth error:', err);
+      showToast(err.message || 'Google authentication failed', 'error');
+    } finally {
+      setGoogleLoading(false);
     }
   };
 
@@ -70,13 +76,15 @@ const LoginPage = () => {
           </div>
         </div>
 
-        {/* Social Auth */}
+        {/* Google Auth Button */}
         <button
           type="button"
           onClick={handleGoogleAuth}
-          className="w-full py-3.5 px-4 rounded-2xl border border-slate-200 dark:border-slate-700/80 bg-white/80 dark:bg-slate-800/80 hover:bg-slate-100 dark:hover:bg-slate-700/80 font-bold text-sm flex items-center justify-center gap-3 transition-all duration-200 shadow-sm hover:shadow-md"
+          disabled={googleLoading}
+          className="w-full py-3.5 px-4 rounded-2xl border border-slate-200 dark:border-slate-700/80 bg-white/80 dark:bg-slate-800/80 hover:bg-slate-100 dark:hover:bg-slate-700/80 font-bold text-sm flex items-center justify-center gap-3 transition-all duration-200 shadow-sm hover:shadow-md cursor-pointer"
         >
-          <FcGoogle className="text-xl" /> Continue with Google
+          <FcGoogle className="text-xl" />
+          {googleLoading ? 'Signing in with Google...' : 'Continue with Google'}
         </button>
 
         <div className="relative flex items-center justify-center">

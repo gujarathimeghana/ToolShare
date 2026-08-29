@@ -28,10 +28,16 @@ const formatManualLocation = (locInput = {}, directFields = {}) => {
 
 exports.register = async (req, res, next) => {
   try {
-    const { name, email, password, phone, location, city, area, state, pincode } = req.body;
+    const { name, email, password, phone, location, city, area, state, pincode, firebaseUid } = req.body;
 
-    if (!name || !email || !password) {
-      return sendResponse(res, 400, false, 'Name, email, and password are required');
+    if (!name || !name.trim()) {
+      return sendResponse(res, 400, false, 'Full name is required');
+    }
+    if (!email || !email.trim()) {
+      return sendResponse(res, 400, false, 'Email address is required');
+    }
+    if (!password || !password.trim()) {
+      return sendResponse(res, 400, false, 'Password is required');
     }
 
     const cleanEmail = email.toLowerCase().trim();
@@ -44,9 +50,10 @@ exports.register = async (req, res, next) => {
       return sendResponse(res, 400, false, 'Password must be at least 6 characters long');
     }
 
+    // Check if email already registered in MongoDB
     const existingUser = await User.findOne({ email: cleanEmail });
     if (existingUser) {
-      return sendResponse(res, 400, false, 'User already exists with this email');
+      return sendResponse(res, 409, false, 'Email is already registered. Please login.');
     }
 
     const formattedLocation = formatManualLocation(location, { city, area, state, pincode });
@@ -54,8 +61,9 @@ exports.register = async (req, res, next) => {
     const user = await User.create({
       name: name.trim(),
       email: cleanEmail,
-      password,
-      phone: phone || '',
+      password: password.trim(),
+      phone: phone ? phone.trim() : '',
+      firebaseUid: firebaseUid || '',
       avatar: '',
       location: formattedLocation
     });
@@ -68,6 +76,7 @@ exports.register = async (req, res, next) => {
         name: user.name,
         email: user.email,
         phone: user.phone,
+        firebaseUid: user.firebaseUid,
         avatar: user.avatar,
         role: user.role,
         isHelper: user.isHelper,
@@ -83,22 +92,27 @@ exports.register = async (req, res, next) => {
 
 exports.login = async (req, res, next) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, firebaseUid } = req.body;
 
-    if (!email || !password) {
-      return sendResponse(res, 400, false, 'Please provide email and password');
+    if (!email || !email.trim() || !password || !password.trim()) {
+      return sendResponse(res, 400, false, 'Please enter email and password');
     }
 
     const cleanEmail = email.toLowerCase().trim();
 
     const user = await User.findOne({ email: cleanEmail }).select('+password');
     if (!user) {
-      return sendResponse(res, 401, false, 'Invalid email or password credentials');
+      return sendResponse(res, 401, false, 'Invalid email or password.');
     }
 
-    const isMatch = await user.matchPassword(password);
+    const isMatch = await user.matchPassword(password.trim());
     if (!isMatch) {
-      return sendResponse(res, 401, false, 'Invalid email or password credentials');
+      return sendResponse(res, 401, false, 'Invalid email or password.');
+    }
+
+    if (firebaseUid && !user.firebaseUid) {
+      user.firebaseUid = firebaseUid;
+      await user.save();
     }
 
     const token = generateToken(user._id, user.role);
@@ -109,6 +123,7 @@ exports.login = async (req, res, next) => {
         name: user.name,
         email: user.email,
         phone: user.phone,
+        firebaseUid: user.firebaseUid,
         avatar: user.avatar,
         role: user.role,
         isHelper: user.isHelper,
@@ -124,7 +139,7 @@ exports.login = async (req, res, next) => {
 
 exports.googleLogin = async (req, res, next) => {
   try {
-    const { email, name, avatar, googleId } = req.body;
+    const { email, name, avatar, googleId, firebaseUid } = req.body;
 
     if (!email) {
       return sendResponse(res, 400, false, 'Email is required for Google authentication');
@@ -138,9 +153,13 @@ exports.googleLogin = async (req, res, next) => {
         name: name || 'Google User',
         email: cleanEmail,
         password: Math.random().toString(36).slice(-10) + 'A1!',
+        firebaseUid: firebaseUid || googleId || '',
         avatar: avatar || '',
         isVerified: true
       });
+    } else if (firebaseUid && !user.firebaseUid) {
+      user.firebaseUid = firebaseUid;
+      await user.save();
     }
 
     const token = generateToken(user._id, user.role);
@@ -203,6 +222,9 @@ exports.verifyPhoneOtp = async (req, res, next) => {
 exports.getProfile = async (req, res, next) => {
   try {
     const user = await User.findById(req.user._id);
+    if (!user) {
+      return sendResponse(res, 404, false, 'User profile not found.');
+    }
     return sendResponse(res, 200, true, 'User profile fetched', user);
   } catch (error) {
     next(error);
@@ -217,7 +239,7 @@ exports.updateProfile = async (req, res, next) => {
 
     if (updates.city || updates.area || updates.state || updates.pincode || updates.location) {
       const currentUser = await User.findById(req.user._id);
-      const existingLoc = currentUser.location || {};
+      const existingLoc = currentUser ? currentUser.location || {} : {};
       updates.location = formatManualLocation(updates.location || existingLoc, {
         city: updates.city,
         area: updates.area,
