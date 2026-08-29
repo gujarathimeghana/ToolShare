@@ -14,17 +14,17 @@ const initSocketIO = require('./sockets/chatSocket');
 const errorHandler = require('./middlewares/errorHandler');
 const { apiLimiter } = require('./middlewares/rateLimiter');
 
-// Connect to MongoDB
+// Connect to MongoDB Atlas
 connectDB();
 
 const app = express();
 const server = http.createServer(app);
 
-// Initialize Socket.IO
+// Initialize Socket.IO with relaxed CORS
 const io = new Server(server, {
   cors: {
     origin: '*',
-    methods: ['GET', 'POST', 'PUT', 'DELETE']
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
   }
 });
 initSocketIO(io);
@@ -32,9 +32,14 @@ initSocketIO(io);
 // Store io instance on app for controllers (req.app.get('io'))
 app.set('io', io);
 
-// Security & Utility Middlewares
+// Security & CORS Middlewares
 app.use(helmet({ contentSecurityPolicy: false }));
-app.use(cors());
+app.use(cors({
+  origin: true, // Allow all origins (localhost:3000, 3001, 3002)
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept']
+}));
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -42,13 +47,13 @@ app.use(express.urlencoded({ extended: true }));
 // Serve static uploads
 app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
 
-// Apply Rate Limiting to API
-app.use('/api', apiLimiter);
-
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'UP', message: 'Neighborly API operational' });
 });
+
+// Apply Rate Limiting to API
+app.use('/api', apiLimiter);
 
 // Register API Routes
 app.use('/api/auth', require('./routes/authRoutes'));

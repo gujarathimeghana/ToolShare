@@ -21,7 +21,7 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response Interceptor: Map informative errors
+// Response Interceptor: Extract clean error messages
 api.interceptors.response.use(
   (response) => response.data,
   (error) => {
@@ -43,7 +43,7 @@ api.interceptors.response.use(
         message = 'Unable to save data to database. Please try again.';
       }
     } else if (error.request) {
-      message = 'Unable to connect to the server. Please check that the backend server is running.';
+      message = 'Unable to connect to the server. Please check that the backend server on port 5000 is running.';
     }
 
     if (!message) {
