@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useNotification } from '../../context/NotificationContext';
 import api from '../../services/api';
-import { FiTool, FiDollarSign, FiShield, FiTag, FiImage, FiFileText, FiPlusCircle } from 'react-icons/fi';
+import { FiPlusCircle } from 'react-icons/fi';
 
 const DEFAULT_TOOL_CATEGORIES = [
   'Power Tools',
@@ -48,7 +48,6 @@ const AddToolPage = () => {
           }));
         }
 
-        // Merge with default categories if any are missing
         DEFAULT_TOOL_CATEGORIES.forEach(defaultCat => {
           if (!loadedCats.some(c => c.name.toLowerCase() === defaultCat.toLowerCase())) {
             loadedCats.push({
@@ -65,7 +64,6 @@ const AddToolPage = () => {
         }
       } catch (err) {
         console.error('Fetch categories error:', err);
-        // Fallback to default categories if API fetch fails
         const fallbackCats = DEFAULT_TOOL_CATEGORIES.map(c => ({ id: c, value: c, name: c }));
         setCategoriesList(fallbackCats);
         setCategory(fallbackCats[0].value);
@@ -100,17 +98,22 @@ const AddToolPage = () => {
 
     setLoading(true);
     try {
+      // Find selected category name if category is an ID
+      const selectedCatObj = categoriesList.find(c => c.value === category || c.id === category);
+      const selectedCatName = selectedCatObj ? selectedCatObj.name : category;
+
       await api.post('/tools', {
         title: title.trim(),
         description: description.trim(),
         category: category,
+        categoryName: selectedCatName,
         pricePerDay: Number(pricePerDay),
         securityDeposit: Number(securityDeposit) || 0,
         condition: condition || 'Good',
         images: imageUrl.trim() ? [imageUrl.trim()] : ['https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=500']
       });
 
-      showToast('Tool listed successfully! Your tool is now available for neighbor sharing.', 'success');
+      showToast('Tool listed successfully!', 'success');
       navigate('/dashboard/listings');
     } catch (err) {
       console.error('Create tool listing error:', err);
@@ -264,7 +267,7 @@ const AddToolPage = () => {
           disabled={loading}
           className="w-full py-4 rounded-2xl font-extrabold text-white text-base btn-gradient shadow-xl hover:opacity-95 transition-all cursor-pointer flex items-center justify-center gap-2"
         >
-          {loading ? 'Creating Listing...' : 'Publish Listing'}
+          {loading ? 'Publishing...' : 'Publish Listing'}
         </button>
       </form>
     </div>

@@ -7,8 +7,8 @@ exports.createTool = async (req, res, next) => {
   try {
     const { title, description, category, categoryName, images, pricePerDay, securityDeposit, condition, location, city, area, state, pincode, tags } = req.body;
 
-    if (!title || !description || !pricePerDay) {
-      return sendResponse(res, 400, false, 'Title, description, and pricePerDay are required');
+    if (!title || !description || pricePerDay === undefined || pricePerDay === null || isNaN(Number(pricePerDay))) {
+      return sendResponse(res, 400, false, 'Title, description, and daily rental price are required');
     }
 
     const catQuery = categoryName || category || 'Power Tools';
@@ -38,8 +38,18 @@ exports.createTool = async (req, res, next) => {
       }
     }
 
-    if (!categoryObj) {
-      categoryObj = await Category.findOne();
+    // Auto-create category in MongoDB Atlas if it doesn't exist yet
+    if (!categoryObj && typeof catQuery === 'string') {
+      try {
+        const slug = catQuery.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+        categoryObj = await Category.create({
+          name: catQuery,
+          slug: slug,
+          type: 'tool'
+        });
+      } catch (e) {
+        categoryObj = await Category.findOne();
+      }
     }
 
     if (!categoryObj) {
@@ -50,20 +60,26 @@ exports.createTool = async (req, res, next) => {
       });
     }
 
-    const toolImages = images && Array.isArray(images) && images.length > 0 && images[0].trim() !== ''
+    const toolImages = images && Array.isArray(images) && images.length > 0 && String(images[0]).trim() !== ''
       ? images
-      : ['https://images.unsplash.com/photo-1504148455328-c376907d081c?w=600'];
+      : ['https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=600'];
 
-    const userLoc = req.user.location || {};
+    const userLoc = req.user?.location || {};
     const toolCity = city || location?.city || userLoc.city || 'New York';
     const toolArea = area || location?.area || userLoc.area || 'Manhattan';
     const toolState = state || location?.state || userLoc.state || 'NY';
-    const toolPincode = pincode || location?.pincode || userLoc.pincode || '';
+    const toolPincode = pincode || location?.pincode || userLoc.pincode || '10001';
     const toolAddress = location?.address || [toolArea, toolCity, toolState].filter(Boolean).join(', ') + (toolPincode ? ` - ${toolPincode}` : '');
 
+    const coords = (location?.coordinates && Array.isArray(location.coordinates) && location.coordinates.length === 2)
+      ? location.coordinates
+      : ((userLoc.coordinates && Array.isArray(userLoc.coordinates) && userLoc.coordinates.length === 2)
+          ? userLoc.coordinates
+          : [-73.935242, 40.73061]);
+
     const tool = await Tool.create({
-      title,
-      description,
+      title: title.trim(),
+      description: description.trim(),
       category: categoryObj._id,
       images: toolImages,
       pricePerDay: Number(pricePerDay),
@@ -72,7 +88,7 @@ exports.createTool = async (req, res, next) => {
       owner: req.user._id,
       location: {
         type: 'Point',
-        coordinates: location?.coordinates || userLoc.coordinates || [-73.935242, 40.73061],
+        coordinates: coords,
         city: toolCity,
         area: toolArea,
         state: toolState,
@@ -82,15 +98,18 @@ exports.createTool = async (req, res, next) => {
       tags: tags || []
     });
 
-    categoryObj.itemCount += 1;
-    await categoryObj.save();
+    if (categoryObj.itemCount !== undefined) {
+      categoryObj.itemCount += 1;
+      await categoryObj.save().catch(() => null);
+    }
 
     const populatedTool = await Tool.findById(tool._id)
       .populate('category', 'name slug icon')
       .populate('owner', 'name avatar rating location phone');
 
-    return sendResponse(res, 201, true, 'Tool listed successfully', populatedTool);
+    return sendResponse(res, 201, true, 'Tool listed successfully!', populatedTool);
   } catch (error) {
+    console.error('createTool error:', error);
     next(error);
   }
 };

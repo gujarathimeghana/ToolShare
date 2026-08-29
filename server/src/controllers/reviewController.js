@@ -33,20 +33,23 @@ exports.createReview = async (req, res, next) => {
 
     // 3. Security & Validation Checks
     const userId = req.user._id.toString();
+    const renterId = booking.renter._id ? booking.renter._id.toString() : booking.renter.toString();
+    const ownerId = booking.owner._id ? booking.owner._id.toString() : booking.owner.toString();
+    const toolId = booking.tool._id ? booking.tool._id.toString() : booking.tool.toString();
 
     // Check borrower ownership of transaction
-    if (booking.renter._id.toString() !== userId) {
+    if (renterId !== userId) {
       return sendResponse(res, 403, false, 'You can only review tools from your own borrowing transactions');
     }
 
     // Prevent reviewing own tool
-    if (booking.owner._id.toString() === userId) {
+    if (ownerId === userId) {
       return sendResponse(res, 400, false, 'You cannot review a tool that belongs to yourself');
     }
 
-    // Ensure transaction is completed/returned
+    // Ensure transaction is completed
     if (booking.status !== 'completed') {
-      return sendResponse(res, 400, false, 'You can only review a tool after the borrowing transaction is marked as completed/returned');
+      return sendResponse(res, 400, false, 'You can only review a tool after the borrowing transaction is marked as completed');
     }
 
     // Check for duplicate review submission
@@ -58,21 +61,21 @@ exports.createReview = async (req, res, next) => {
     // 4. Create & Save Review
     const review = await Review.create({
       reviewer: req.user._id,
-      reviewee: booking.owner._id,
-      tool: booking.tool._id,
+      reviewee: ownerId,
+      tool: toolId,
       booking: booking._id,
-      toolOwner: booking.owner._id,
+      toolOwner: ownerId,
       targetType: 'tool',
       rating: finalRating,
       comment: finalComment
     });
 
     // 5. Recalculate Tool Average Rating & Review Count
-    const allToolReviews = await Review.find({ tool: booking.tool._id });
+    const allToolReviews = await Review.find({ tool: toolId });
     const totalRatingSum = allToolReviews.reduce((sum, r) => sum + r.rating, 0);
     const avgRating = Number((totalRatingSum / allToolReviews.length).toFixed(1));
 
-    await Tool.findByIdAndUpdate(booking.tool._id, {
+    await Tool.findByIdAndUpdate(toolId, {
       rating: avgRating,
       reviewCount: allToolReviews.length
     });
@@ -167,7 +170,9 @@ exports.checkEligibility = async (req, res, next) => {
       return sendResponse(res, 404, false, 'Borrowing transaction not found', { eligible: false });
     }
 
-    if (booking.renter.toString() !== userId) {
+    const renterId = booking.renter._id ? booking.renter._id.toString() : booking.renter.toString();
+
+    if (renterId !== userId) {
       return sendResponse(res, 200, true, 'Ineligible: Not the borrower', { eligible: false, reason: 'Not borrower' });
     }
 
