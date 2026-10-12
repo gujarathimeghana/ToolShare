@@ -51,7 +51,7 @@ app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
-  res.status(200).json({ status: 'UP', message: 'Neighborly API operational' });
+  res.status(200).json({ success: true, status: 'UP', message: 'Neighborly backend is running' });
 });
 
 // Apply Rate Limiting to API
@@ -73,7 +73,13 @@ app.use('/api/admin', require('./routes/adminRoutes'));
 // Global Error Handler
 app.use(errorHandler);
 
-const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => {
-  console.log(`[Neighborly Server] Running on port ${PORT} in ${process.env.NODE_ENV || 'development'} mode`);
-});
+// Start server when executed directly (local dev, Railway, Render, etc.)
+if (require.main === module) {
+  const PORT = process.env.PORT || 5000;
+  server.listen(PORT, () => {
+    console.log(`[Neighborly Server] Running on port ${PORT} in ${process.env.NODE_ENV || 'development'} mode`);
+  });
+}
+
+// Export express app for Vercel Serverless Functions
+module.exports = app;
